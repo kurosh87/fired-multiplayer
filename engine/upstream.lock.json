@@ -1,0 +1,56 @@
+{
+  "firered": {
+    "repository": "pret/pokefirered",
+    "commit": "037335f4c725d7c9aecdac87066f2002b4bd7e14",
+    "sourceBytes": 31738086,
+    "revision": 1,
+    "variants": [
+      "firered",
+      "leafgreen"
+    ],
+    "portInputs": {
+      "src/main.c": "0bfa6c662b1cbd49bd31020b6c2509208004611e6701ad64badce22eca371139",
+      "include/gba/defines.h": "4356e895d7108dedd2c788bbbe98e0948778712a4ea6374193bdc1a851efe69b",
+      "include/gba/io_reg.h": "4b1d9592c1f2fdbefaa4f7f0d2751e5cef11069432303aa46bec142af57086d0",
+      "include/gba/macro.h": "2a5d91f41b2bb15f72a3a4340f8c795aafb38f67348d4acaa9100faf53f001e2"
+    }
+  },
+  "mgbaReference": {
+    "repository": "mgba-emu/mgba",
+    "commit": "26b7884bc25a5933960f3cdcd98bac1ae14d42e2",
+    "version": "0.10.5",
+    "usage": "Headless independent GBA correctness reference only. Not shipped or used as the browser game engine."
+  },
+  "agbccReference": {
+    "repository": "pret/agbcc",
+    "commit": "da598c1d918402c42c0c0d7128ba14567f3175e9",
+    "usage": "Matching ARM compiler for independent, unchanged GBA revision 1 baselines. Never part of the browser runtime."
+  },
+  "emeraldReference": {
+    "repository": "tripplyons/pokeemerald-wasm",
+    "commit": "fd83f5b6e609b61b0b10777e32c74343e1a81b41",
+    "usage": "Reference only; not a FireRed engine artifact."
+  },
+  "nativeFireRedReference": {
+    "repository": "venom13/pokefirered-dualscreen",
+    "commit": "cd551d2c6ae5536a2599114fed5ed823a9c9678c",
+    "usage": "Reference for portable C BIOS, graphics and sound. Android-only early-game validation; not a verified browser/LeafGreen/multiplayer engine.",
+    "battleInputs": {
+      "src/battle_controller_player.c": "0d0e689bb3dfe85997f2ce5f9a90437f831486c198163d0d37a9df49af29763f",
+      "src/link.c": "ad2a5c303c30a350add3c49def7c316c63f22d7669dbc9080ae0a56ecc08049d",
+      "src/battle_controllers.c": "5a0abae084282f32732d81f9dfb65308c72ae5fe1c9732eed937280f6dba283e",
+      "src/battle_main.c": "13c1092261ba8afa32f75d24fbee16d362434236c5c14aecf76f571269e11b02",
+      "src/menu_helpers.c": "ac404f7061de3041529435f0a5012f263846ed9514e6c39575aa9bc0654191c7"
+    },
+    "portInputs": {
+      "src/librfu_intr.c": "06d45b1ad8ad8851f7e4478ad877bd0300dbec0b4d75f8d26a9e47919563faa7",
+      "src/multiboot.c": "c3e20beebee761e7757f26194823923635937b23f566974d738ad1b901d8c898",
+      "src/script.c": "1cc4aade1f821e5f218ba7c191b1217e5a3cf942d0bfd0f32f775ce1f808437c",
+      "src/pokemon.c": "116a470cd9ebfa226aa8d85c2eb63591e176d726837c67baaa1ac6260d50f2ec",
+      "src/start_menu.c": "b401a71552acbd6bdd87b3950867ef2501ad7a007fc49d9c426209e32ac041ad",
+      "src/main.c": "7d4bba931b0ed676d7b373073c34e4b2a7a60576dd785c0c554c612de86821c0",
+      "src/trade.c": "63d8e4e9fd5aeb1339f2f63aeed1d108b8df50d3e9933f1838b4f96b94248695",
+      "src/trade_scene.c": "529eb344f332cb9339206769eb758520677b36e5763305261fd3295a51ae2c14"
+    }
+  }
+}

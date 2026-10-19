@@ -1,0 +1,121 @@
+# Standalone private routing profile; do not merge with compose.staging.yml.
+name: kanto-routing-staging
+
+x-runtime: &runtime
+  image: ${KANTO_API_IMAGE:?Set the locally built reviewed image}
+  pull_policy: never
+  user: "1000:1000"
+  init: true
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  cgroup: private
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,size=16777216,mode=1777
+  ulimits:
+    core: 0
+    nofile:
+      soft: 1024
+      hard: 2048
+  restart: "on-failure:3"
+  stop_grace_period: 30s
+  logging:
+    driver: local
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+x-api: &api
+  <<: *runtime
+  command: [node, --experimental-strip-types, apps/server/src/main.ts]
+  cpus: 2.0
+  mem_limit: 4g
+  memswap_limit: 4g
+  pids_limit: 192
+  env_file:
+    - path: ${KANTO_RUNTIME_ENV_FILE:?Set the absolute private API runtime env file}
+      format: raw
+      required: true
+  environment:
+    NODE_ENV: production
+    HOST: 0.0.0.0
+    PORT: "8787"
+    WEB_ORIGIN: ${KANTO_WEB_ORIGIN:?Set the exact staging frontend origin}
+    TRUST_PROXY_CIDRS: ${KANTO_GATEWAY_PRIVATE_IP:-172.30.44.2}/32
+    ENGINE_DIRECTORY: /opt/kanto/artifacts
+    BATTLE_ENGINE_DIRECTORY: /opt/kanto/artifacts/battle
+    GAME_WORKER_TRANSPORT: process
+    ADVENTURE_WORKERS: "2"
+    BATTLE_WORKERS: "1"
+    TRADE_WORKERS: "2"
+    INSPECTION_WORKERS: "2"
+    PUBLIC_RELEASE: "false"
+  networks: [workers]
+  volumes:
+    - type: bind
+      source: ${KANTO_ENGINE_DIRECTORY:?Set the absolute reviewed artifact directory}
+      target: /opt/kanto/artifacts
+      read_only: true
+      bind:
+        create_host_path: false
+  healthcheck:
+    test: [CMD, node, -e, "fetch('http://127.0.0.1:8787/healthz',{signal:AbortSignal.timeout(2000)}).then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+    interval: 30s
+    timeout: 5s
+    start_period: 20s
+    retries: 3
+
+services:
+  api-alpha:
+    <<: *api
+  api-bravo:
+    <<: *api
+  gateway:
+    <<: *runtime
+    command: [node, --experimental-strip-types, apps/server/src/gateway-main.ts]
+    cpus: 1.0
+    mem_limit: 512m
+    memswap_limit: 512m
+    pids_limit: 64
+    env_file:
+      - path: ${KANTO_GATEWAY_RUNTIME_ENV_FILE:?Set the separate Auth-only gateway env file}
+        format: raw
+        required: true
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      GATEWAY_PORT: "8788"
+      WEB_ORIGIN: ${KANTO_WEB_ORIGIN:?Set the exact staging frontend origin}
+      WORKER_NODES_JSON: '[{"id":"alpha","origin":"http://api-alpha:8787"},{"id":"bravo","origin":"http://api-bravo:8787"}]'
+      # Add a separately reviewed ingress before trusting any forwarded IP.
+      TRUST_PROXY_CIDRS: ""
+      DATABASE_URL: ""
+      PUBLIC_RELEASE: "false"
+    ports:
+      - "127.0.0.1:8788:8788"
+    networks:
+      ingress:
+      workers:
+        ipv4_address: ${KANTO_GATEWAY_PRIVATE_IP:-172.30.44.2}
+    depends_on:
+      api-alpha:
+        condition: service_healthy
+      api-bravo:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:8788/healthz',{signal:AbortSignal.timeout(2000)}).then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+networks:
+  ingress:
+    driver: bridge
+  workers:
+    # Outbound networking is required for hosted Auth and Postgres. API ports
+    # are not published; only these three services join this project network.
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${KANTO_WORKER_SUBNET:-172.30.44.0/28}

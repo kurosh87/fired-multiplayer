@@ -1,0 +1,940 @@
+{
+  "seed": 12345,
+  "runs": [
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 8,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 8,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 128,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    }
+  ],
+  "description": "Recorded button-only route: original intro, default trainer name, preset rival name, bedroom. Self-replay evidence, not an independent GBA reference.",
+  "sourceCommit": "cd551d2c6ae5536a2599114fed5ed823a9c9678c",
+  "variants": [
+    "firered",
+    "leafgreen"
+  ],
+  "expectedFrames": 7571
+}

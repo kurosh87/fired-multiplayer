@@ -1,0 +1,19 @@
+project_id = "kanto-online"
+
+[db]
+major_version = 17
+
+[db.migrations]
+schema_paths = ["./schemas/*.sql"]
+
+[auth]
+site_url = "http://127.0.0.1:5173"
+additional_redirect_urls = ["http://127.0.0.1:5173/account/recovery"]
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+
+[auth.rate_limit]
+email_sent = 2

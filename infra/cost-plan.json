@@ -1,0 +1,68 @@
+{
+  "checkedAt": "2026-10-16",
+  "currency": "USD",
+  "approved": false,
+  "provisioned": false,
+  "capacity1000Qualified": false,
+  "privateStaging": {
+    "purpose": "Hosted Auth setup and small Linux qualification; no public game launch",
+    "host": {
+      "provider": "DigitalOcean Basic Regular",
+      "vcpus": 4,
+      "memoryGiB": 8,
+      "monthlyListUsd": 48,
+      "hourlyListUsd": 0.07143,
+      "source": "https://www.digitalocean.com/pricing/droplets"
+    },
+    "authDatabase": {
+      "provider": "Dedicated Supabase Pro organization with one Micro project",
+      "monthlyStartingUsd": 25,
+      "source": "https://supabase.com/pricing"
+    },
+    "coreMonthlyStartingUsd": 73,
+    "excluded": ["SMTP and sending domain", "Netlify plan/usage", "tax", "metered overages", "optional backups and operational services"],
+    "container": {"cpuLimit": 2, "memoryLimitGiB": 4, "pidsLimit": 192, "apiReplicas": 1},
+    "linuxWorkloadQualified": false
+  },
+  "capacityBudgetExample": {
+    "purpose": "Illustrative catalog arithmetic for planning the 1000-player goal, not a sized or deployable production configuration",
+    "compute": {
+      "provider": "DigitalOcean General Purpose Regular",
+      "hosts": 4,
+      "vcpusPerHost": 32,
+      "memoryGiBPerHost": 128,
+      "monthlyListUsdPerHost": 1008,
+      "monthlySubtotalUsd": 4032,
+      "source": "https://www.digitalocean.com/pricing/droplets"
+    },
+    "authDatabasePlaceholder": {
+      "provider": "Supabase Pro plus XL compute, less included compute credit",
+      "planMonthlyUsd": 25,
+      "computeMonthlyApproxUsd": 210,
+      "computeCreditMonthlyUsd": 10,
+      "monthlyApproxUsd": 225,
+      "sources": ["https://supabase.com/pricing", "https://supabase.com/docs/guides/platform/compute-and-disk"],
+      "throughputQualified": false
+    },
+    "routingCachePlaceholder": {
+      "provider": "DigitalOcean Valkey, 2 GiB primary plus matching standby",
+      "nodes": 2,
+      "monthlyStartingUsdPerNode": 30,
+      "monthlyStartingSubtotalUsd": 60,
+      "source": "https://docs.digitalocean.com/products/databases/valkey/details/pricing/",
+      "integrationImplemented": false
+    },
+    "checkpointStoragePlaceholder": {
+      "provider": "DigitalOcean Spaces base subscription",
+      "monthlyStartingUsd": 5,
+      "includedStorageGiB": 250,
+      "includedOutboundTiB": 1,
+      "source": "https://www.digitalocean.com/pricing/spaces-object-storage",
+      "integrationImplemented": false
+    },
+    "partialMonthlyApproxUsd": 4322,
+    "excluded": ["ingress/load balancing", "SMTP and domain", "Netlify plan/usage", "database disk/IO and traffic overages", "checkpoint retention and transfer overages", "tax", "additional backups/observability"],
+    "completeHostingQuote": false,
+    "assumptions": ["Catalog monthly amounts; Supabase compute is hourly and month length changes its actual bill", "Cloud vCPUs are not measured M4 Pro cores", "Process RSS sums are not physical RAM per player", "At least 32 API replicas would be needed to admit 1000 adventures with the current 32-worker per-pool ceiling", "The one-replica staging Compose profile does not implement this multi-host example", "Global admission, distributed ownership/routing, object storage, failure testing and Linux load qualification remain required"]
+  }
+}

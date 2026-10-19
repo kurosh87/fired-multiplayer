@@ -1,0 +1,34 @@
+@import "tailwindcss" source("./");
+@import "tw-animate-css";
+@custom-variant dark (&:is(.dark *));
+@theme inline {
+  --color-background: var(--background); --color-foreground: var(--foreground);
+  --color-card: var(--card); --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover); --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary); --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary); --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted); --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent); --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive); --color-border: var(--border);
+  --color-input: var(--input); --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px); --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius); --radius-xl: calc(var(--radius) + 4px);
+}
+:root {
+  --font-sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --radius: .625rem; --background: #f6f2e9; --foreground: #292c28;
+  --card: #fffdf7; --card-foreground: #292c28; --popover: #fffdf7; --popover-foreground: #292c28;
+  --primary: #292c28; --primary-foreground: #faf7ef; --secondary: #ece8dd; --secondary-foreground: #353b32;
+  --muted: #e8e5dc; --muted-foreground: #646c61; --accent: #e7e8db; --accent-foreground: #292c28;
+  --fire-surface: #f1e0d5; --fire-foreground: #8d3e2d;
+  --leaf-surface: #e4e9d8; --leaf-foreground: #435a32;
+  --destructive: #bb4035; --border: #dedbd1; --input: #c9ccbc; --ring: #ce493a;
+}
+.dark {
+  color-scheme: dark; --edition: #ff755f; --edition-rgb: 255,117,95;
+  --background: #101318; --foreground: #e8edf3; --card: #202630; --card-foreground: #e8edf3;
+  --popover: #202630; --popover-foreground: #e8edf3; --primary: var(--edition); --primary-foreground: #171a1e;
+  --secondary: #2b3440; --secondary-foreground: #e1e6ee; --muted: #252d38; --muted-foreground: #96a2b3;
+  --accent: #303b48; --accent-foreground: #f1f4f8; --destructive: #ff8674; --border: #39414d; --input: #485362; --ring: var(--edition);
+}
+@layer base { * { @apply border-border outline-ring/50; } body { @apply bg-background text-foreground; } }

@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "jsx": "react-jsx",
+    "skipLibCheck": true,
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
+    "paths": { "@/*": ["./apps/web/src/*"] }
+  },
+  "include": ["apps/**/*.ts", "apps/**/*.tsx", "packages/**/*.ts", "scripts/**/*.ts", "tests/**/*.ts", "tests/**/*.tsx", "netlify/functions/**/*.mts"]
+}

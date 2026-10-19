@@ -1,0 +1,64 @@
+name: kanto-staging
+services:
+  api:
+    # Build from the explicit source archive first. Never pull an unreviewed tag.
+    image: ${KANTO_API_IMAGE:?Set the locally built staging image}
+    pull_policy: never
+    user: "1000:1000"
+    init: true
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    cgroup: private
+    cpus: 2.0
+    mem_limit: 4g
+    memswap_limit: 4g
+    pids_limit: 192
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16777216,mode=1777
+    ulimits:
+      core: 0
+      nofile:
+        soft: 1024
+        hard: 2048
+    restart: "on-failure:3"
+    stop_grace_period: 30s
+    env_file:
+      - path: ${KANTO_RUNTIME_ENV_FILE:?Set an absolute private runtime env file}
+        format: raw
+        required: true
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: "8787"
+      WEB_ORIGIN: ${KANTO_WEB_ORIGIN:?Set the exact staging frontend origin}
+      TRUST_PROXY_CIDRS: ""
+      ENGINE_DIRECTORY: /opt/kanto/artifacts
+      BATTLE_ENGINE_DIRECTORY: /opt/kanto/artifacts/battle
+      GAME_WORKER_TRANSPORT: process
+      ADVENTURE_WORKERS: "2"
+      BATTLE_WORKERS: "1"
+      TRADE_WORKERS: "2"
+      INSPECTION_WORKERS: "2"
+      PUBLIC_RELEASE: "false"
+    ports:
+      # Private first boot via SSH forwarding; add verified TLS ingress separately.
+      - "127.0.0.1:8787:8787"
+    volumes:
+      - type: bind
+        source: ${KANTO_ENGINE_DIRECTORY:?Set an absolute reviewed artifact directory}
+        target: /opt/kanto/artifacts
+        read_only: true
+        bind:
+          create_host_path: false
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:8787/healthz',{signal:AbortSignal.timeout(2000)}).then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "3"

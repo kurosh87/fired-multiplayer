@@ -1,0 +1,10 @@
+# Test-only mount; excluded from the deployable image and production profile.
+services:
+  api:
+    volumes:
+      - type: bind
+        source: ${KANTO_TEST_DIRECTORY:?Set the CI test fixture directory}
+        target: /opt/kanto/tests
+        read_only: true
+        bind:
+          create_host_path: false

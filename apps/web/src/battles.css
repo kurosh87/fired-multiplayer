@@ -1,0 +1,5 @@
+.battle-page>p{max-width:960px;font-size:12px;line-height:1.7;margin:0}
+.battle-page .battle-controls{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.battle-page .battle-controls button{min-width:0;padding:8px 4px}
+.battle-confirm,.game-feedback{max-width:960px}
+.battle-confirm-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}

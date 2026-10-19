@@ -1,0 +1,60 @@
+# Overlay for compose.staging.yml only. No image is pulled by config validation.
+services:
+  api:
+    environment:
+      TRUST_PROXY_CIDRS: ${KANTO_INGRESS_PRIVATE_IP:-172.30.45.2}/32
+    networks: [https-ingress]
+  ingress:
+    # Official multi-architecture image index, resolved October 17, 2026.
+    image: caddy:2.11.7-alpine@sha256:d8542f48d34a9cf4e4c11a478865229840e87e4c96ea3f439101f31a5d35f75f
+    user: "1000:1000"
+    init: true
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    cpus: 0.5
+    mem_limit: 512m
+    memswap_limit: 512m
+    pids_limit: 64
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16777216,mode=1777
+    command: [caddy, run, --config, /etc/caddy/Caddyfile, --adapter, caddyfile]
+    environment:
+      KANTO_API_DOMAIN: ${KANTO_API_DOMAIN:?Set the approved exact API hostname}
+      KANTO_ACME_EMAIL: ${KANTO_ACME_EMAIL:?Set the approved certificate contact email}
+      XDG_DATA_HOME: /data
+      XDG_CONFIG_HOME: /tmp/caddy-config
+    ports:
+      - "80:8080"
+      - "443:8443"
+    volumes:
+      - type: bind
+        source: ${KANTO_CADDYFILE:?Set the absolute reviewed Caddyfile path}
+        target: /etc/caddy/Caddyfile
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${KANTO_TLS_DIRECTORY:?Set the persistent UID-1000 TLS directory}
+        target: /data
+        bind:
+          create_host_path: false
+    networks:
+      https-ingress:
+        ipv4_address: ${KANTO_INGRESS_PRIVATE_IP:-172.30.45.2}
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: "on-failure:3"
+    stop_grace_period: 30s
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "3"
+networks:
+  https-ingress:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${KANTO_INGRESS_SUBNET:-172.30.45.0/28}

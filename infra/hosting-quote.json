@@ -1,0 +1,124 @@
+{
+  "checkedAt": "2026-10-17T04:06:16.054Z",
+  "currency": "USD",
+  "approved": false,
+  "provisioned": false,
+  "purpose": "Private hosted account and persistence qualification toward the full original game/multiplayer/1000-player objective",
+  "recommended": {
+    "profile": "infra/compose.staging.yml",
+    "host": {
+      "provider": "DigitalOcean Basic Regular bundled",
+      "vcpus": 4,
+      "memoryGiB": 8,
+      "diskGiB": 160,
+      "includedTransferGiB": 5000,
+      "monthlyUsd": 48
+    },
+    "database": {
+      "provider": "Dedicated Kanto Supabase Pro organization, one Micro",
+      "monthlyStartingUsd": 25,
+      "existingOrganizationsModified": false
+    },
+    "email": {
+      "provider": "Resend Free",
+      "monthlyUsd": 0,
+      "messagesPerMonth": 3000,
+      "messagesPerDay": 100,
+      "verifiedDomainRequired": true
+    },
+    "frontend": {
+      "provider": "Existing Netlify Pro team/site",
+      "planChangeSelected": false,
+      "newSubscriptionUsd": 0,
+      "existingSubscriptionExcluded": true,
+      "meteredChargesVerified": false
+    },
+    "ingress": {
+      "software": "Caddy on the same host",
+      "additionalLicenseUsd": 0,
+      "configurationPrepared": true,
+      "nativeTransportQualified": true,
+      "linuxDeploymentQualified": false,
+      "publicAcmeQualified": false,
+      "setup": "infra/HTTPS-STAGING.md",
+      "evidence": "build/ingress-v2-https/report.json"
+    },
+    "monthlyBaseUsd": 73,
+    "configuredAdventureWorkers": 2,
+    "measuredCapacity": null
+  },
+  "gatewayAlternative": {
+    "profile": "infra/compose.gateway.staging.yml",
+    "hostMonthlyUsd": 96,
+    "databaseMonthlyStartingUsd": 25,
+    "monthlyBaseUsd": 121,
+    "configuredAdventureWorkers": 4,
+    "measuredCapacity": null
+  },
+  "domain": {
+    "registrar": "Porkbun",
+    "type": "Standard non-premium .com",
+    "nameSelected": null,
+    "availabilityChecked": false,
+    "currentListedStartingAnnualUsd": 11.08,
+    "announcedNov1ApproxAnnualUsd": 11.81,
+    "proposedFirstYearAllowanceUsd": 25,
+    "alreadyOwnedDomainNewRegistrationUsd": 0,
+    "purchaseApproved": false,
+    "renewalApproved": false
+  },
+  "totals": {
+    "singleApiFirstMonthAtListedDomainUsd": 84.08,
+    "singleApiFirstMonthWithDomainAllowanceUsd": 98,
+    "gatewayFirstMonthWithDomainAllowanceUsd": 146,
+    "providerEnforcedTotalSpendingCap": false,
+    "taxAndFxExcluded": true,
+    "meteredChargesExcluded": true
+  },
+  "observedNetlify": {
+    "siteId": "4fcf6389-9abb-4239-8134-d99fa08b85d8",
+    "sitePlan": "nf_team_pro",
+    "teamId": "6a5c6de23522c9d2e2c85119",
+    "teamType": "Pro",
+    "currentDeployId": "6ad2ee6c09629acf1d91981a",
+    "readOnly": true,
+    "usageAndInvoiceInspected": false
+  },
+  "conditions": [
+    "Dedicated Kanto resources only",
+    "Verify provider checkout/region before purchase",
+    "Supabase spend cap on; no extra compute/projects/add-ons selected",
+    "Email Free quota; no paid overages selected",
+    "Do not modify shared Netlify billing/recharge settings",
+    "No new resources, upgrades, paid add-ons or deletion without applicable authorization"
+  ],
+  "acceptance": [
+    "Real signup email and confirmation",
+    "Unique immutable trainer handle",
+    "Login/logout/password recovery",
+    "Separate adventure slots",
+    "Linux runtime/resource enforcement and exact HTTPS/WSS origins",
+    "Cloud gameplay/battle/trade acceptance after artifact qualification"
+  ],
+  "pending": [
+    "Existing dedicated resources or approval for new recurring services",
+    "Sender domain selection and DNS control",
+    "Provider access and verified checkout",
+    "Hosted SMTP, Linux/HTTPS, game artifact and load qualification"
+  ],
+  "fullGoalAchieved": false,
+  "capacity1000Qualified": false,
+  "production1000QuoteComplete": false,
+  "sources": [
+    "https://www.digitalocean.com/pricing/droplets",
+    "https://docs.digitalocean.com/products/droplets/details/pricing/",
+    "https://supabase.com/pricing",
+    "https://supabase.com/docs/guides/platform/cost-control",
+    "https://supabase.com/changelog/logs-usage-based-pricing",
+    "https://resend.com/pricing",
+    "https://resend.com/docs/send-with-supabase-smtp",
+    "https://porkbun.com/products/domains",
+    "https://kb.porkbun.com/article/201-why-did-com-prices-go-up-and-how-high-will-they-go",
+    "https://caddyserver.com/docs/automatic-https"
+  ]
+}

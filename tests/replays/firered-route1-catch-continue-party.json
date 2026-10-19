@@ -1,0 +1,251 @@
+{
+  "seed": 12345,
+  "sourceCommit": "cd551d2c6ae5536a2599114fed5ed823a9c9678c",
+  "variants": [
+    "firered"
+  ],
+  "description": "Continue the caught-party cartridge, skip the original quest-log recap with B, and open Pokemon after the unlocked Pokedex menu entry.",
+  "runs": [
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 8,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 24
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 36
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 24
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 6
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 24
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 6
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 24
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 6
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 24
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 6
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 24
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 6
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 24
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 6
+    },
+    {
+      "buttons": 2,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 2,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 8,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 30
+    },
+    {
+      "buttons": 128,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 24
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    }
+  ],
+  "expectedFrames": 2166
+}

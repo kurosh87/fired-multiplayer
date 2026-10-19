@@ -1,0 +1,34 @@
+[build]
+  command = "npm run build:preview"
+  publish = "build/netlify-preview"
+
+[build.environment]
+  KANTO_NETLIFY_ACCOUNTS = "1"
+  KANTO_PREVIEW_CANDIDATE = "battle-text-audio-16"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+  included_files = ["!.env", "!**/.env", "!**/.env.*"]
+
+[functions.battles]
+  included_files = ["build/netlify-battle-runtime/**", "!.env", "!**/.env", "!**/.env.*"]
+
+[[redirects]]
+  from = "/account/recovery"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "same-origin"
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/preview-data/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+

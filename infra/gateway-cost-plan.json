@@ -1,0 +1,90 @@
+{
+  "checkedAt": "2026-10-17T02:45:52.007551+00:00",
+  "currency": "USD",
+  "approved": false,
+  "provisioned": false,
+  "purpose": "Private two-API gateway functional qualification; no public game launch or 1000-player sizing",
+  "runtimeProfile": {
+    "path": "infra/compose.gateway.staging.yml",
+    "sha256": "8d1eb5ee23f5bca1dfccfc0de680519333777ec2c7a25e3306af9371f992e7d7",
+    "apiReplicas": 2,
+    "apiMemoryGiBEach": 4,
+    "gatewayMemoryGiB": 0.5,
+    "configuredMemoryCeilingGiB": 8.5,
+    "configuredCpuCeiling": 5,
+    "adventureWorkersPerApi": 2,
+    "configuredAdventureWorkers": 4,
+    "hostOverheadIncludedInContainerLimits": false
+  },
+  "hosts": [
+    {
+      "name": "DigitalOcean Basic Regular bundled plan",
+      "cpuType": "shared",
+      "vcpus": 8,
+      "memoryGiB": 16,
+      "diskGiB": 320,
+      "includedTransferGiB": 6000,
+      "hourlyListUsd": 0.14286,
+      "monthlyListUsd": 96,
+      "purpose": "Initial small functional qualification; variable shared CPU performance"
+    },
+    {
+      "name": "DigitalOcean CPU-Optimized Regular bundled plan",
+      "cpuType": "dedicated",
+      "vcpus": 8,
+      "memoryGiB": 16,
+      "diskGiB": 100,
+      "includedTransferGiB": 6000,
+      "hourlyListUsd": 0.25,
+      "monthlyListUsd": 168,
+      "purpose": "Alternative for repeatable steady CPU measurements; workload still unqualified"
+    }
+  ],
+  "authDatabase": {
+    "name": "Dedicated Supabase Pro organization with one Micro project",
+    "planMonthlyUsd": 25,
+    "computeMonthlyStartingUsd": 10,
+    "includedComputeCreditUsd": 10,
+    "coreMonthlyStartingUsd": 25,
+    "source": "https://supabase.com/pricing",
+    "existingUnrelatedOrgChanged": false
+  },
+  "coreMonthlyStartingUsd": {
+    "sharedHostAndAuthDatabase": 121,
+    "dedicatedHostAndAuthDatabase": 193
+  },
+  "sources": [
+    "https://www.digitalocean.com/pricing/droplets",
+    "https://docs.digitalocean.com/products/droplets/details/pricing/",
+    "https://supabase.com/pricing",
+    "https://supabase.com/changelog/logs-usage-based-pricing"
+  ],
+  "billing": {
+    "hostPlanType": "Bundled, not v5",
+    "hostMonthlyCapHours": 672,
+    "hostBilledWhilePoweredOff": true,
+    "additionalOutboundUsdPerGiB": 0.01,
+    "v5MonthlyCapApplies": false
+  },
+  "excluded": [
+    "SMTP and sending domain",
+    "Netlify plan and usage",
+    "TLS ingress and public exposure configuration",
+    "Taxes",
+    "Optional backups and monitoring",
+    "Database disk, IO, log usage and transfer overages",
+    "Game host transfer overages",
+    "Account-specific credits and availability"
+  ],
+  "limitations": [
+    "This is starting catalog arithmetic, not a complete quote or spending cap",
+    "16 GiB minus 8.5 GiB configured ceilings leaves a nominal 7.5 GiB for the host; this is arithmetic, not measured headroom",
+    "The configured pool limits admit only four adventure workers, not 1000 active players",
+    "Shared vCPUs and local M4 Pro measurements do not establish cloud throughput",
+    "Public registration, confirmed-email delivery, Linux image/runtime behavior and capacity remain unqualified",
+    "Supabase log billing grace for a newly created organization must be checked at creation"
+  ],
+  "capacity1000Qualified": false,
+  "linuxWorkloadQualified": false,
+  "completeHostingQuote": false
+}

@@ -1,0 +1,32 @@
+.trade-invitations { margin: 28px 0; }
+.trade-card { margin: 18px 0; }
+.trade-invitations > .lobby-panel { margin: 18px 0; }
+.trade-card .lobby-columns { margin: 0 0 20px; gap: 12px; }
+.trade-offer { min-width: 0; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--muted); overflow-wrap: anywhere; }
+.trade-offer > p:first-child { margin-top: 0; font-size: 12px; color: var(--muted-foreground); }
+.trade-offer strong { font-size: 14px; }
+.trade-card [data-slot="card-content"] > p,.trade-offer p { font-size: 12px; line-height: 1.7; color: var(--muted-foreground); }
+.trade-card [data-slot="native-select-wrapper"] { width: 100%; }
+.trade-card .lobby-toolbar { flex-wrap: wrap; justify-content: flex-start; }
+.lobby-list li > div { min-width: 0; overflow-wrap: anywhere; }
+.lobby-list [data-slot="button"] { flex-shrink: 0; }
+.game-page .lobby-toolbar > p { line-height: 1.6; }
+.trainer-search { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 10px; }
+.trainer-search-field { flex: 1 1 180px; min-width: 0; gap: 8px; }
+.trainer-pagination { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+.trainer-page-status { font-size: 13px; color: var(--muted-foreground); }
+.trainer-directory .lobby-list li { flex-wrap: wrap; }
+.trainer-directory .lobby-list li > div { flex: 1 1 110px; }
+.trainer-directory .lobby-list .trainer-row-actions { display: flex; flex: 0 1 auto; flex-wrap: wrap; gap: 8px; }
+.trainer-avatar { position: relative; display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: var(--radius); background: var(--secondary); color: var(--secondary-foreground); }
+.trainer-avatar > svg { width: 18px; height: 18px; }
+.trainer-avatar .online-dot { position: absolute; bottom: -2px; right: -2px; border: 2px solid var(--card); width: 10px; height: 10px; }
+
+.trainer-directory .lobby-list li { gap: 10px; }
+.trainer-filters { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.party-preview { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; }
+.party-preview-chip { display: inline-flex; align-items: baseline; gap: 5px; padding: 2px 8px; border: 1px solid var(--border); border-radius: 999px; font-size: 12px; background: var(--secondary); color: var(--secondary-foreground); }
+.party-preview-chip em { font-style: normal; opacity: .75; font-variant-numeric: tabular-nums; }
+.quick-match { margin: 18px 0; }
+.quick-match .lobby-toolbar { flex-wrap: wrap; justify-content: flex-start; }
+.trainer-pagination { gap: 4px; }

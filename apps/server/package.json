@@ -1,0 +1,14 @@
+{
+  "name": "@kanto/server",
+  "private": true,
+  "type": "module",
+  "scripts": { "dev": "node --experimental-strip-types --env-file-if-exists=../../.env --watch src/main.ts", "start": "node --experimental-strip-types --env-file-if-exists=../../.env src/main.ts" },
+  "dependencies": {
+    "@supabase/supabase-js": "2.118.0",
+    "fastify": "5.12.7",
+    "@fastify/cors": "11.3.1",
+    "@fastify/websocket": "11.3.4",
+    "pg": "8.23.1",
+    "ws": "8.22.0"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-10-16T21:59:18.044760+00:00",
+  "source": "https://hub.docker.com/v2/repositories/library/node/tags/24-bookworm-slim",
+  "tag": "24-bookworm-slim",
+  "digest": "sha256:a5f4366e834695d5f363b920c104953a535d3a9864d1bdf74566a0ebe01daee5",
+  "lastUpdated": "2026-10-14T20:39:20.928769Z",
+  "linuxImages": [
+    {
+      "architecture": "amd64",
+      "digest": "sha256:ec857ea6bb60cb3d0fa4d97495590c5fe7d51be8572c307b55957eeb06569cf7"
+    },
+    {
+      "architecture": "ppc64le",
+      "digest": "sha256:aebbbd33159ba6a85f2374ab6e91688d3126d45217b3e7551bc5c40826648daa"
+    },
+    {
+      "architecture": "arm64",
+      "digest": "sha256:156e9bc7a0a267cc6ca77b4283e32b123479342df684ce297455d7b95ff5a6b5"
+    }
+  ]
+}

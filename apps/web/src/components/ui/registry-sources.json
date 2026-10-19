@@ -1,0 +1,78 @@
+{
+  "retrievedAt": "2026-10-16T17:10:35.046513+00:00",
+  "source": "shadcn/ui official New York v4 registry",
+  "adaptations": [
+    "relative TypeScript imports",
+    "local clsx + tailwind-merge utility"
+  ],
+  "components": {
+    "button": {
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/button.json",
+      "upstreamSha256": "79dd6f75f8136394442202d6b8b922fb269eaad0a5dba579397c9d5b41f893bb",
+      "localSha256": "366005d8f0ac17b6bfba72a1f7ad4b09a06549aa7c8503084c7ceb463171b994"
+    },
+    "badge": {
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/badge.json",
+      "upstreamSha256": "13a9380dfff853ee730c14a52df49f22aecd31f40f2998d7c1e7ec458b6e1650",
+      "localSha256": "de03ff42fece79e9487149f3844879669165a8a73fa330e1f921ca073743f720"
+    },
+    "card": {
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/card.json",
+      "upstreamSha256": "ef8305b12c3112dab42a4708b41b1ebcc042fa5ab4c20f039da8d45b09ed5059",
+      "localSha256": "10675bb3ba8740da9ac4ef3b715e8ea73c0e13e2ce35b679e3bff12a9b7db5f1"
+    },
+    "native-select": {
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/native-select.json",
+      "upstreamSha256": "4bdbce5575dce610fed747df4547a3d494713f4df8d28e09b3ccee62e4d72f93",
+      "localSha256": "3a9925b6fcbbe87868127db67838d4a515a053bad18f5fbf81df7ac16c969f1b"
+    },
+    "dialog": {
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/dialog.json",
+      "upstreamSha256": "2ade6074e5fad0a4eb171ead44c43d3301a3c83d186d7236fb1fdbea80ee556b",
+      "localSha256": "dd85189017dbe7451b9e4654dd470abd94e429c4145fe3aa9880c78663c925f3"
+    },
+    "tooltip": {
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/tooltip.json",
+      "upstreamSha256": "611e4305879b2773eafe76bf3c5caa69d8e47367fd97887a71634a27828f4433",
+      "localSha256": "cc1605566acae93c32238ce0ce52915ba74fcc4b26f28f2f02cb16f1c47e94b6"
+    },
+    "separator": {
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/separator.json",
+      "upstreamSha256": "ad7d5403fe337160e41dbf04147896e448ae3a747b8d06660d627d74d60021bc",
+      "localSha256": "3c3f09f52caca3f25337bbfe8938952c8a689080d3d42e35b72a5d51d8595365"
+    },
+    "input": {
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/input.json",
+      "upstreamSha256": "0c9457181f6ddc80969bcf854e92c362903a55b6e889fbef3fd85343ecc4af5b",
+      "localSha256": "02cf5652378dc414eccda15377a1d98396f54eb37dc22733f98fdde5e4969b52"
+    },
+    "label": {
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/label.json",
+      "upstreamSha256": "344bde38b8531615dbf8e14af3895517c24d8ef6ce56ddeda7e2e6fe4b5d0c00",
+      "localSha256": "68f3068e28560b1cf4705774716ec83c6c2335f99d0cf62fd3a1461dda81d842"
+    },
+    "kbd": {
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/kbd.json",
+      "upstreamSha256": "c0c0ae6a7d1adb7749b9b34cab8f4d2f5caf333e819b64c2051e77f918d3661f",
+      "localSha256": "759fef4d4ae945deb4b8f1fde7a0c40c64083c128ec9bfd5077522322fb273e1"
+    },
+    "alert": {
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/alert.json",
+      "retrievedAt": "2026-10-16T21:13:20.843818+00:00",
+      "upstreamSha256": "413c97869ec0e53efa4a37f590833bcf4a7a57255f5a2e909c6bb5bac7b4570d",
+      "localSha256": "4c7c2886c44a015233ddc43ca52d7f8b8f09d73b4676b63567aa7aeca4458e64"
+    },
+    "empty": {
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/empty.json",
+      "retrievedAt": "2026-10-16T23:44:19.991413+00:00",
+      "upstreamSha256": "54f529ccf72c18c4b5abd5586a7cf1f2a4c8d207aac366029d66ed095cb2965d",
+      "localSha256": "e66855696a7d59f0f829f615884fda0ca1fc68213d399f028fffd62360c7ac8c"
+    },
+    "field": {
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/field.json",
+      "retrievedAt": "2026-10-16T23:44:20.094475+00:00",
+      "upstreamSha256": "4a4d17fcb933513f637f9f7e2daf5d8348f7de086b29738337dec7e6dd1819a0",
+      "localSha256": "a70e2eba203741c667f90d58cff8f077e0f5c039c9fa4aba0f6871641fee30ce"
+    }
+  }
+}

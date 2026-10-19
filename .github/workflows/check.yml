@@ -1,0 +1,103 @@
+name: Source and runtime checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  runtime-contracts:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci --ignore-scripts
+      - run: node --experimental-strip-types --test tests/*.test.ts
+      - run: python3 -B -m unittest discover -s tests -p '*_test.py' -v
+      - run: cc -fsyntax-only -std=c11 engine/port/kanto_bridge.c
+      - run: python3 scripts/check-platform.py
+      - run: sudo apt-get update && sudo apt-get install -y binutils-arm-none-eabi lld binaryen
+      - run: python3 scripts/check-data-conversion.py
+      - run: python3 scripts/check-scheduler.py
+      - run: python3 scripts/check-reset-memory.py
+  application:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:web
+  database:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: kanto_test_only
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci --ignore-scripts
+      - run: npm run db:check
+        env:
+          DATABASE_TEST_URL: postgresql://postgres:kanto_test_only@127.0.0.1:5432/postgres
+  container-runtime:
+    runs-on: ubuntu-24.04
+    env:
+      KANTO_TEST_DIRECTORY: ${{ github.workspace }}/tests
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -B scripts/package-api-context.py --output build/api-context.tar
+      - run: python3 -B scripts/check-staging-config.py --tag linux-staging-ci
+      - run: python3 -B scripts/check-gateway-staging.py --tag gateway-staging-ci
+      - name: Build only the reviewed server context
+        run: |
+          KANTO_CONTEXT_SHA=$(python3 -c 'import json; print(json.load(open("build/api-context.tar.manifest.json"))["sha256"])')
+          docker build -f infra/api.Dockerfile --build-arg "SOURCE_SHA256=$KANTO_CONTEXT_SHA" -t kanto-api-staging:fixture - < build/api-context.tar
+          docker image inspect kanto-api-staging:fixture --format '{{.Id}}' > build/linux-image-id.txt
+      - name: Boot with the actual bounded staging profile
+        run: docker compose --env-file build/linux-staging-ci-compose/fixture-operator.env -f infra/compose.staging.yml -f infra/compose.ci.yml up --detach --wait --wait-timeout 45
+      - name: Observe Linux process and cgroup settings
+        run: docker compose --env-file build/linux-staging-ci-compose/fixture-operator.env -f infra/compose.staging.yml -f infra/compose.ci.yml exec -T api node --experimental-strip-types infra/inspect-linux-runtime.ts > build/linux-runtime-observed.json
+      - name: Check the real main entry and private process recovery
+        run: |
+          python3 - <<'PY'
+          import json, urllib.error, urllib.request
+          assert urllib.request.urlopen('http://127.0.0.1:8787/healthz',timeout=5).status == 200
+          try:
+              urllib.request.urlopen('http://127.0.0.1:8787/readyz',timeout=5)
+          except urllib.error.HTTPError as error:
+              assert error.code == 503 and json.load(error)['ready'] is False
+          else:
+              raise AssertionError('An empty artifact registry passed readiness.')
+          status = json.load(urllib.request.urlopen('http://127.0.0.1:8787/api/status',timeout=5))
+          assert len(status['engines']) == 2 and all(not entry['available'] for entry in status['engines'])
+          with open('build/linux-staging-http.json','w') as output:
+              json.dump({'liveness200':True,'unqualifiedReadiness503':True,'gameAdmissionUnavailable':True},output)
+          PY
+          docker compose --env-file build/linux-staging-ci-compose/fixture-operator.env -f infra/compose.staging.yml -f infra/compose.ci.yml exec -T api node -e 'if(process.env.DATABASE_URL !== "postgresql://fixture:literal$dollar@fixture.invalid/db")process.exit(1)'
+          docker compose --env-file build/linux-staging-ci-compose/fixture-operator.env -f infra/compose.staging.yml -f infra/compose.ci.yml exec -T api node --experimental-strip-types --test tests/private-worker-pool.test.ts
+      - name: Stop owned containers
+        if: always()
+        run: |
+          docker compose --env-file build/linux-staging-ci-compose/fixture-operator.env -f infra/compose.staging.yml -f infra/compose.ci.yml logs --no-color > build/linux-staging-ci.log || true
+          docker compose --env-file build/linux-staging-ci-compose/fixture-operator.env -f infra/compose.staging.yml -f infra/compose.ci.yml down --timeout 30
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linux-staging-runtime
+          path: |
+            build/api-context.tar.manifest.json
+            build/linux-staging-ci-compose/report.json
+            build/gateway-staging-ci-gateway-compose/report.json
+            build/linux-image-id.txt
+            build/linux-runtime-observed.json
+            build/linux-staging-http.json
+            build/linux-staging-ci.log

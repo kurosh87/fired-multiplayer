@@ -1,0 +1,236 @@
+{
+  "runs": [
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 8,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 24
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 36
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 24
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 6
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 24
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 6
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 24
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 6
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 24
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 6
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 24
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 6
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 24
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 6
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 8,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 1,
+      "frames": 1
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    },
+    {
+      "buttons": 0,
+      "frames": 60
+    }
+  ],
+  "seed": 12345,
+  "description": "Continue from a canonical save, finish quest-log recap, and open the original Pokemon menu so original C validates encrypted party data.",
+  "sourceCommit": "cd551d2c6ae5536a2599114fed5ed823a9c9678c",
+  "expectedFrames": 2289
+}
