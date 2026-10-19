@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {readFile,writeFile} from 'node:fs/promises';
+import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {randomUUID} from 'node:crypto';
 import {EngineRegistry} from '../packages/engine/registry.ts';
 import {createCheckpointBaseline,encodeCheckpoint,decodeCheckpoint,maxCheckpointBytes} from '../packages/engine/checkpoint.ts';
@@ -104,6 +104,7 @@ export async function checkOriginalBattleSessions(database:Database,owners:[stri
     assert.deepEqual(await service.forfeit(owners[0],challenge.id),final.result,'A retry changed the original result.');
     assert.deepEqual((await database.pool.query('select id,revision,flash from private.adventures order by id')).rows,before);
     assert.equal((await database.pool.query("select count(*)::int as n from private.game_sessions where owner_id=any($1::uuid[]) and status='lobby'",[owners])).rows[0].n,2);
+    await mkdir('build',{recursive:true});
     await writeFile('build/battle-service-report.json',JSON.stringify({artifacts:[registry.manifest('firered').id,registry.manifest('leafgreen').id],
       originalC:true,postgresJournal:true,checkpointAndJournalRecovery:true,recoveredFrame,staleWorkerRejected:true,
       sourceAdventuresUnchanged:true,privateScreensOnly:true,screenCounts:screens,decisionDeadlinePreserved:true,

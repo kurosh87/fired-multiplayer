@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
-import {writeFile} from 'node:fs/promises';
+import {mkdir,writeFile} from 'node:fs/promises';
 import {Database,type DatabaseListener} from '../apps/server/src/database.ts';
 import {LIVE_BATTLE_PREFIX,LobbyPresence,LOBBY_CHANNEL,notifyLiveBattle,notifyLobbyPresence,type LobbyPresenceMessage} from '../apps/server/src/lobby-presence.ts';
 
@@ -135,6 +135,7 @@ export async function checkLobbyPresence(database:Database):Promise<void>{
     assert.deepEqual(messages.at(-1),{type:'del',ownerId:p3});
     assert.deepEqual(visible(),['Presence001','Presence002','Presence004']);
 
+    await mkdir('build',{recursive:true});
     await writeFile('build/lobby-presence-report.json',JSON.stringify({realPostgres:true,realNotifyDelivery:true,
       dedicatedListener:true,fixtureTrainers:4,baselineExcludesExpiredSuspendedAndBusy:true,unsuspensionReturns:true,
       renewedLeaseReturns:true,battleDepartureAndReturn:true,partyUpdateVisible:true,leaseTimerDeparture:true,

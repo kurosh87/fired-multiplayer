@@ -5,7 +5,7 @@ WORKDIR /opt/kanto
 COPY package.json package-lock.json ./
 COPY apps/server/package.json ./apps/server/package.json
 COPY apps/web/package.json ./apps/web/package.json
-RUN npm ci --workspace=@kanto/server --omit=dev --ignore-scripts --no-audit --no-fund
+RUN npm ci --workspace=@kanto/server --include-workspace-root --omit=dev --ignore-scripts --no-audit --no-fund
 
 FROM node:24-bookworm-slim@sha256:a5f4366e834695d5f363b920c104953a535d3a9864d1bdf74566a0ebe01daee5 AS runtime
 ARG SOURCE_SHA256

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
-import {writeFile} from 'node:fs/promises';
+import {mkdir,writeFile} from 'node:fs/promises';
 import type {FastifyInstance} from 'fastify';
 import type {Database} from '../apps/server/src/database.ts';
 import type {LobbyTrainerPage} from '../packages/protocol/index.ts';
@@ -94,6 +94,7 @@ export async function checkLobbyDiscovery(database:Database,app:FastifyInstance)
     assert.equal((await app.inject({method:'GET',url:'/api/lobby/trainers?search=Scout'})).statusCode,401);
     assert.equal((await app.inject({method:'GET',url:'/api/lobby/trainers?search=Scout',headers:{authorization:'Bearer fixture-unconfirmed'}})).statusCode,403);
     assert.equal((await app.inject({method:'GET',url:'/api/lobby/trainers?search=Scout',headers:{authorization:'Bearer fixture-bob'}})).statusCode,409);
+    await mkdir('build',{recursive:true});
     await writeFile('build/lobby-discovery-report.json',JSON.stringify({realPostgres:true,realApi:true,
       authProvider:'isolated local fixture',candidateTrainers:136,visibleTrainers:132,pageSizes:pages.map(page=>page.trainers.length),
       caseInsensitivePrefix:true,literalUnderscore:true,after100Discoverable:true,expiredSuspendedBusyAndOwnExcluded:true,
