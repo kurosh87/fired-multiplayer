@@ -246,10 +246,13 @@ a real encoded keyframe/delta onto the canvas (12/12 desktop and mobile).
 `tests/original-battle-sessions.ts` also asserts that a spectator's pixels are
 byte-identical to the owner's own side and that suspension and non-lobby
 admission fail against the real original-C battle. That engine-gated leg
-(`KANTO_CHECK_ORIGINAL_BATTLES=1`) did not complete in this session: the shared
-guard stopped the job at critical kernel memory pressure (`memory_pressure=4`,
-`resource_stopped`, receipt in `~/.local/share/mini-storage/build-jobs.json`),
-so it remains an open qualification item rather than a passed check.
+(`KANTO_CHECK_ORIGINAL_BATTLES=1`) remains an open qualification item: two
+attempts ended with the test runner reporting only `test failed` and no
+assertion (before the original-battle report was written), and one attempt was
+stopped by the shared guard at critical kernel memory pressure
+(`memory_pressure=4`, `resource_stopped`). A normal-pressure retry on October 19
+UTC after the CI fixes reproduced the silent engine-leg failure (55 s, no
+assertion), so it is not treated as a passed check.
 
 Slice 2 milestone 3 (live-list push over the presence socket) additionally
 covers: `tests/lobby-presence.test.ts` (baseline read, start and finish
