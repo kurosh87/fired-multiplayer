@@ -18,8 +18,9 @@ The opt-in spectator and lobby live-list slice is implemented locally:
   active battle or committing trade is surfaced on the adventure screen with a
   one-click return to the lobby;
 - the private `kanto-battle-check` Netlify branch hosts the request-driven HTTP
-  battle Function for test-only two-account qualification. Socket watch,
-  live-list and trades still require the persistent host.
+  battle Function and a clickable `/battle-test/` page for test-only
+  two-account qualification. Socket watch, live-list and trades still require
+  the persistent host.
 
 Local verification is complete: `npm run typecheck`; the unit suite
 (132 tests, 131 passing, one skip); the database contract lane; the full

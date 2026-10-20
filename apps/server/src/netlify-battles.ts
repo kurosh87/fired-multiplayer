@@ -5,6 +5,8 @@ import {Database} from './database.ts';
 import {createBetterAuthAuthenticator} from './account-auth.ts';
 import {requestBattleHttp} from './request-battle-http.ts';
 import {RequestBattles} from './request-battles.ts';
+import {testLobbyResponse} from './netlify-test-lobby.ts';
+import {DomainError} from '../../../packages/protocol/index.ts';
 import {EngineRegistry} from '../../../packages/engine/registry.ts';
 import {PRIVATE_BATTLE_PINS} from '../../../packages/battles/private-artifacts.ts';
 import {BattleConsolePool} from '../../../packages/battles/console-pool.ts';
@@ -36,20 +38,33 @@ export function createNetlifyBattles(connectionString:string,secret:string,runti
     url:pathToFileURL(resolve(runtimeDirectory,'battle-worker.mjs')),transport:'thread',
   });
   const service=new RequestBattles(game,registry,{workerFactory:()=>workers.scope()});
-  const origins=new Map<string,ReturnType<typeof requestBattleHttp>>();
+  const origins=new Map<string,{endpoint:ReturnType<typeof requestBattleHttp>;authenticate:(authorization:string|undefined)=>Promise<string>}>();
+  const unavailable={ 'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff' };
   return {
     async fetch(request:Request,origin:string):Promise<Response>{
-      let endpoint=origins.get(origin);
-      if(!endpoint){
+      let entry=origins.get(origin);
+      if(!entry){
         const authenticate=createBetterAuthAuthenticator(accounts,origin,secret);
-        endpoint=requestBattleHttp(service,async authorization=>{
+        const endpoint=requestBattleHttp(service,async authorization=>{
           const owner=await authenticate(authorization);
           await ready();
           return owner;
         },origin);
-        if(origins.size>=4)origins.clear();origins.set(origin,endpoint);
+        entry={endpoint,authenticate};
+        if(origins.size>=4)origins.clear();origins.set(origin,entry);
       }
-      return endpoint(request);
+      if(new URL(request.url).pathname==='/api/online/test-lobby'){
+        try{
+          const owner=await entry.authenticate(request.headers.get('Authorization')??undefined);
+          await ready();
+          return await testLobbyResponse(request,owner,game,runtimeDirectory);
+        }catch(error){
+          const known=error instanceof DomainError;
+          return Response.json({error:known?error.code:'BATTLES_UNAVAILABLE',
+            message:known?error.message:'Battle services are temporarily unavailable.'},{status:known?error.status:503,headers:unavailable});
+        }
+      }
+      return entry.endpoint(request);
     },
     async close(){await workers.close();await Promise.all([game.close(),accounts.end()]);},
   };

@@ -93,6 +93,27 @@ Two operational causes were found and fixed:
 The previous opaque `Error while running build` was this size limit;
 `netlify deploy --verbose` surfaced the real `JSONHTTPError`.
 
+## Clickable test page
+
+The branch deploy also serves `/battle-test/` from the immutable deploy
+hostname. It signs in with the preview account Functions, reserves a trainer
+name, seeds a test lobby from the retained qualification save, lists other
+prepared trainers, challenges and accepts through the HTTP battle API, and
+opens the request-driven `RequestBattle` viewer. Evidence:
+`build/battle-test-page/report.json`; driver: `scripts/check-battle-test-page.ts`.
+
+The page is test-only and deliberately narrow:
+
+- `/api/online/test-lobby` is gated to the `branch-deploy` context and the
+  immutable hostname; production and ordinary deploy previews are rejected.
+- It seeds a FireRed slot-0 save and a ten-minute lobby session. It is not the
+  public lobby, does not exercise trades, and does not exercise the socket
+  spectator watch or live list.
+- Accounts must be confirmed. The preview Resend sender is used for sign-up;
+  the local page check uses two pre-confirmed preview accounts.
+- Use the immutable deploy URL, not the `kanto-battle-check--` alias: the
+  account and battle Functions accept only the immutable hostname.
+
 The seventh matchmaking migration was corrected before its first hosted
 application: foreign keys reference `kanto_preview.profiles(account_uuid)`,
 because `public.profiles` is a view. It is applied on `kanto-battle-check` only;

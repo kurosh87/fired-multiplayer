@@ -46,6 +46,10 @@ if(battlePreview){
     banner:{js:'import { createRequire as kantoCreateRequire } from "node:module"; const require = kantoCreateRequire(import.meta.url);'}});
 }
 await cp(source,stage+'/public',{recursive:true,errorOnExist:true,force:false});
+if(battlePreview){
+  assert(existsSync('build/battle-test'),'Build the private battle test page before staging.');
+  await cp('build/battle-test',stage+'/public/battle-test',{recursive:true});
+}
 await cp('netlify/database/migrations',stage+'/netlify/database/migrations',{recursive:true});
 await writeFile(stage+'/netlify.toml',(await readFile('netlify.toml','utf8')).replace('command = "npm run build:preview"','command = "node verify-bundle.mjs"')
   .replace('publish = "build/netlify-preview"','publish = "public"').replace('directory = "netlify/functions"','directory = "functions"'));

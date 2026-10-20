@@ -42,7 +42,13 @@ def run(label, command, cwd=ROOT, env=None):
     return result.stdout
 
 run('typecheck', ['node', 'node_modules/typescript/bin/tsc', '--noEmit'])
+run('test-page', ['node', '--experimental-strip-types', 'scripts/build-battle-test.ts'])
 run('stage', ['node', '--experimental-strip-types', 'scripts/stage-netlify-preview.ts', '--retain-previous', '--battle-preview'], env=dict(os.environ, KANTO_PREVIEW_OUTPUT='build/netlify-request-battles-v1'))
+retained = STAGE / 'retained'
+if retained.exists():
+    outside = Path.home() / '.local/share' / ('kanto-netlify-accounts-v1-retained-' + str(int(time.time())))
+    retained.rename(outside)
+    print('retained previous bundle outside the stage: ' + str(outside), flush=True)
 deploy = json.loads(run('preview-deploy', ['/opt/homebrew/bin/netlify', 'deploy', '--site', '4fcf6389-9abb-4239-8134-d99fa08b85d8',
     '--context', 'deploy-preview', '--alias', 'kanto-battle-check', '--message', 'Private original-C battle Function qualification', '--json'], STAGE))
 assert deploy['site_id'] == '4fcf6389-9abb-4239-8134-d99fa08b85d8'

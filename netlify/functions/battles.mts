@@ -15,5 +15,5 @@ export default async function handler(request:Request,context:Context){
   }
 }
 
-export const config:Config={path:['/api/online/battles','/api/online/battles/*'],
+export const config:Config={path:['/api/online/battles','/api/online/battles/*','/api/online/test-lobby'],
   rateLimit:{windowLimit:900,windowSize:60,aggregateBy:['ip','domain']}};

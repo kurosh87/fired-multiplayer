@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {mkdir,readFile,writeFile} from 'node:fs/promises';
+import {mkdir,readFile,writeFile,copyFile} from 'node:fs/promises';
 import {existsSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {build} from 'esbuild';
@@ -22,7 +22,9 @@ export async function buildNetlifyBattleRuntime(directory:string){
     // Keep the actual manifest, including its unqualified public capabilities.
     await writeFile(resolve(directory,version+'.wasm'),bytes,{mode:0o600});
     await writeFile(resolve(directory,version+'.json'),await readFile(source+'.json'),{mode:0o600});
+    await copyFile(resolve('build/game-source',version,'gameplay.sav'),resolve(directory,`test-${version}.sav`));
     hashes[version+'.wasm']=hash;
+    hashes[`test-${version}.sav`]=createHash('sha256').update(await readFile(resolve(directory,`test-${version}.sav`))).digest('hex');
   }
   await build({entryPoints:['packages/battles/console-worker.ts'],outfile:resolve(directory,'battle-worker.mjs'),
     bundle:true,platform:'node',target:'node24',format:'esm',sourcemap:false});
