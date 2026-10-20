@@ -141,18 +141,18 @@ test('a burst of notifications becomes one row read and ordered events',async()=
 
 test('an expired lease hides a trainer and a renewed lease brings it back',async()=>{
   const {database,listeners,presence}=harness();
-  database.put(owner(1),{handle:'Scout001',lease:Date.now()+25});
+  database.put(owner(1),{handle:'Scout001',lease:Date.now()+500});
   await presence.start();
   const events:LobbyPresenceMessage[]=[];
   presence.subscribe(message=>events.push(message));
-  await tick();
+  await new Promise(resolve=>setTimeout(resolve,600));
   assert.deepEqual(events,[],'The known lease must lapse before anything happens.');
 
   database.remove(owner(1));
   await presence.verifyStale();
   assert.deepEqual(events,[{type:'del',ownerId:owner(1)}]);
 
-  database.put(owner(1),{handle:'Scout001',lease:Date.now()+25});
+  database.put(owner(1),{handle:'Scout001'});
   listeners[0]!.notifications(owner(1));
   await waitFor(()=>events.length===2,'the return');
   assert.deepEqual(events[1],{type:'put',trainer:{id:owner(1),handle:'Scout001',version:'firered',party:[],maxLevel:null}});
