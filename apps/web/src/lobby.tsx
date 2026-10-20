@@ -75,33 +75,15 @@ export function Lobby({ authenticated, available, trading=false, battles=false, 
     const refresh=()=>{
       if(document.hidden||busy||leaving)return;
       const epoch=requestEpoch.current;
-      void battleApi<{battles:BattleView[]}>('').then(value=>{if(current&&epoch===requestEpoch.current)setChallenges(value.battles);})
+      void battleApi<{battles:BattleView[];live?:LiveBattle[];quick?:QuickMatchStatus}>('').then(value=>{
+        if(current&&epoch===requestEpoch.current){
+          setChallenges(value.battles);
+          if(!httpBattles)setLiveBattles(value.live??[]);
+          if(value.quick?.status==='waiting'){setQuick('searching');setQuickSince(value.quick.enqueuedAt);}
+          else {setQuick('idle');setQuickSince(undefined);}
+        }
+      })
         .catch(failure=>{if(current&&epoch===requestEpoch.current)setError(failure.message);});
-    };
-    refresh();const timer=setInterval(refresh,5000);return()=>{current=false;clearInterval(timer);};
-  },[available,authenticated,battles,busy,leaving]);
-  useEffect(()=>{
-    if(!available||!authenticated||!battles||httpBattles)return;
-    let current=true;
-    const refresh=()=>{
-      if(document.hidden||busy||leaving)return;
-      const epoch=requestEpoch.current;
-      void battleApi<{battles:LiveBattle[]}>('/live').then(value=>{if(current&&epoch===requestEpoch.current)setLiveBattles(value.battles);})
-        .catch(()=>{/* The live list is advisory; polling and the lobby stay usable. */});
-    };
-    refresh();const timer=setInterval(refresh,5000);return()=>{current=false;clearInterval(timer);};
-  },[available,authenticated,battles,busy,leaving]);
-  useEffect(()=>{
-    if(!available||!authenticated||!battles||httpBattles)return;
-    let current=true;
-    const refresh=()=>{
-      if(document.hidden||busy||leaving)return;
-      const epoch=requestEpoch.current;
-      void battleApi<QuickMatchStatus>('/quick').then(value=>{
-        if(!current||epoch!==requestEpoch.current)return;
-        if(value.status==='waiting'){setQuick('searching');setQuickSince(value.enqueuedAt);}
-        else {setQuick('idle');setQuickSince(undefined);}
-      }).catch(()=>{/* The next poll retries; the queue row is unchanged. */});
     };
     refresh();const timer=setInterval(refresh,5000);return()=>{current=false;clearInterval(timer);};
   },[available,authenticated,battles,busy,leaving]);

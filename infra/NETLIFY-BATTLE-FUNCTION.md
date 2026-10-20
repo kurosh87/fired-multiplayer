@@ -36,10 +36,15 @@ in SQL. Cold restoration is required and tested; a warm cache is optional.
 ## Evidence and exact scope
 
 - Initial complete native qualification: `build/netlify-battle-function-v3/report.json`.
-- Hosted preview deploy: `6ad3b4d874d22a33435abe77`, branch `kanto-battle-check`.
-- Hosted proof: `build/netlify-battle-preview-1792259283/hosted-report-v3.json`.
-- Archived source and closeout: the same directory's `qualified-source/` and
-  `completion.json`.
+- Current native qualification: `build/netlify-accounts-check-1792502730677/report.json`
+  (PostgreSQL 18, battle UI and request-driven HTTP proofs).
+- Initial hosted preview deploy: `6ad3b4d874d22a33435abe77`, branch `kanto-battle-check`.
+- Current hosted branch deploy: `6ad7729b8764ebc36c75b76c`, branch and database
+  branch `kanto-battle-check`, eight applied migrations, zero pending.
+- Current hosted proof: `build/netlify-battle-preview-6ad7729b-hosted.json`
+  (480 frames; 2,743.5 ms median, 3,087 ms p95, 3,187 ms maximum per step).
+- Archived source and closeout: `build/netlify-battle-preview-1792259283/`
+  `qualified-source/` and `completion.json`.
 - Current optimization qualification: `build/netlify-battle-warm-v2/report.json`,
   with components in `build/netlify-accounts-check-1792259862358/`.
 
@@ -59,27 +64,34 @@ separate test uses real database time. The new scope tests independently cover
 state clearing, reused workers, stale aborts and cold recovery after an
 in-flight worker kill. The main app, socket battle and solo checks also pass.
 
-The first hosted sample has eight advancing requests: 3,489.5 ms median,
-3,558 ms maximum. This is too slow for public multiplayer. The current idle
-worker optimization has **no hosted speed result yet**.
+The initial hosted sample had eight advancing requests: 3,489.5 ms median,
+3,558 ms maximum. The current branch preview advanced 480 frames; step latency
+is 2,743.5 ms median, 3,087 ms p95 and 3,187 ms maximum. This is still too slow
+for public multiplayer; the preview is test-only.
 
-## Latest deployment stop
+## October 20 branch preview
 
-The optimized preview attempt stopped in the CLI's local build phase with
-`Error while running build`. It returned neither a deploy id nor detailed
-build output. Logs are retained under
-`build/netlify-battle-preview-1792260237/`. The affected project is
-`kanto-online-preview`, branch `kanto-battle-check`; inspect its
-[Netlify deploy history](https://app.netlify.com/projects/kanto-online-preview/deploys).
-Do not invent a failed-deploy identifier or a root cause from the empty output.
-No retry, rollback, production publish or lower-level workaround was performed.
-The previous hosted preview remains the last qualified hosted battle build.
+The optimized preview now deploys as a real branch deploy:
+`6ad7729b8764ebc36c75b76c` on `kanto-battle-check`, database branch
+`kanto-battle-check`, eight applied migrations and zero pending. The hosted
+proof passed with two SDK-created accounts, an original-C worker, exact
+lost-reply retry, tab-replacement fencing, checkpoint and personal-picture
+parity, unchanged canonical cartridges, atomic forfeit and logout revocation.
+Production HTML remained byte-identical; production keeps six migrations.
 
-Netlify's database skill explicitly requires stopping after a failed Netlify
-command and reporting its error and logs. A subsequent continuation should
-start with build diagnostics that retain verbose output, then qualify the new
-preview before claiming a speed improvement. The staged bundle and native
-databases are retained.
+Two operational causes were found and fixed:
+
+- `--context branch:kanto-battle-check` alone created a deploy preview with
+  `database_branch_id: null`. The CLI creates a real branch deploy with
+  `--context deploy-preview --alias kanto-battle-check` only after the staging
+  folder has a local Git branch with that name. The unsafe previews without a
+  database branch were deleted.
+- The Function zip exceeded the 250 MB limit because the staging `retained/`
+  directory was swept into the bundle (434 MB uncompressed, 201 MB zipped).
+  Moving the retained bundles outside the stage reduced the zip to 27 MB.
+
+The previous opaque `Error while running build` was this size limit;
+`netlify deploy --verbose` surfaced the real `JSONHTTPError`.
 
 The seventh matchmaking migration was corrected before its first hosted
 application: foreign keys reference `kanto_preview.profiles(account_uuid)`,

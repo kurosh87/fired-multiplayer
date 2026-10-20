@@ -63,9 +63,10 @@ leave the server: presence is species names, levels and a maximum level only.
 
 The lobby client shows a Quick Match card (find, searching with a stop control,
 or continue a ready match) and hands a paired result straight to the battle
-view. A five-second status poll restores the searching state after a reload or
-reconnect, including the original queue time; it never creates a second entry.
-An active battle or committing trade is also surfaced on the adventure screen
+view. The existing five-second battles poll also returns the persisted queue
+state, so the searching state and original queue time are restored after a
+reload or reconnect without another request or a second entry. An active battle
+or committing trade is also surfaced on the adventure screen
 with a one-click return to the lobby, so a reload does not bury the resume path.
 The card is scoped to the original API transport; the hosted
 request-driven battle viewer has no queue endpoints, and the card is hidden
@@ -171,8 +172,9 @@ delivers the public result and closes `1000`, and `recovery-required` closes
 so deltas stay ordered when two spectators watch different sides.
 
 The web lobby lists live battles only for the original socket transport: the
-presence stream pushes `live` replacements as battles start and finish, and the
-five-second poll remains authoritative and fills in after a reconnect (the
+five-second battles poll returns the live list alongside challenges and queue
+state, the presence stream pushes `live` replacements as battles start and
+finish, and the poll remains authoritative and fills in after a reconnect (the
 hosted request-driven viewer has no live list). The list opens a read-only watch
 screen with a side toggle, the public participants and the rendered canvas. It
 never renders controls, party data, saves or journal state.
@@ -205,9 +207,9 @@ HTTP-battle and browser checks. Latest evidence:
 `supabase/migrations/20261019120000_watchable-battles.sql` and
 `netlify/database/migrations/20261019120000_watchable-battles/migration.sql`
 add the opt-in `private.battles.watchable` column and its partial live-list
-index. The change is prepared in the migration chain but has not been applied to
-the hosted preview; the public solo deployment and every capability flag remain
-unchanged.
+index. The change is applied on the private `kanto-battle-check` battle
+preview (eight applied migrations, zero pending); production retains six and
+the public solo deployment, and every capability flag remains unchanged.
 
 ## Qualification status
 

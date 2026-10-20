@@ -20,7 +20,16 @@ export function registerBattleApi(app:FastifyInstance,service:BattleSessions|und
   };
   const connections=new Map<string,{socket:WebSocket;id:string;epoch:number;encoder:BattleScreenEncoder}>();
   const watchers=new Map<string,{socket:WebSocket;battleId:string;side:WatchSide;encoder:BattleScreenEncoder}>();
-  app.get('/api/battles',async request=>({battles:await requireService().list(await owner(request.headers.authorization))}));
+  app.get('/api/battles',async request=>{
+    const id=await owner(request.headers.authorization);
+    const battleService=requireService();
+    const battles=await battleService.list(id);
+    const [live,quickStatus]=await Promise.all([
+      battleService.liveBattlesFor(id).catch(()=>[]),
+      quick?quick.status(id).catch(()=>undefined):Promise.resolve(undefined)
+    ]);
+    return {...(quickStatus?{quick:quickStatus}:{}),battles,live};
+  });
   app.get('/api/battles/live',async request=>{
     const id=await owner(request.headers.authorization);
     return {battles:await requireService().liveBattlesFor(id)};
