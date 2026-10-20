@@ -32,6 +32,7 @@ export function Lobby({ authenticated, available, trading=false, battles=false, 
   const [busy,setBusy] = useState(false);
   const [notice,setNotice] = useState('');
   const [quick,setQuick]=useState<'idle'|'searching'>('idle');
+  const [watchable,setWatchable]=useState(false);
   const requestEpoch=useRef(0);
   const interaction=trades.some(trade=>trade.status==='committing')||challenges.some(battle=>['starting','active'].includes(battle.status));
   const quickBattle=challenges.find(battle=>['starting','active'].includes(battle.status));
@@ -119,7 +120,7 @@ export function Lobby({ authenticated, available, trading=false, battles=false, 
     {notice && <StatusMessage>{notice}</StatusMessage>}
     {challenges.length>0&&<div className="trade-invitations"><h2>Battle challenges</h2>{challenges.map(battle=><LobbyPanel key={battle.id}
       title={`@${battle.playerA.handle} vs @${battle.playerB.handle}`} headingLevel={3} icon={Swords}
-      description="Singles · original levels · unranked"
+      description={`Singles · original levels · unranked${battle.watchable?' · spectators allowed':''}`}
       status={<Badge variant="secondary">{battle.status==='offered'?'Invitation':'In progress'}</Badge>}
       footer={<div className="lobby-toolbar">
         {battle.status==='offered'&&battle.side==='a'&&<p>Waiting for your opponent to accept…</p>}
@@ -184,10 +185,10 @@ export function Lobby({ authenticated, available, trading=false, battles=false, 
         status={<Badge variant="outline">{lobby.party.length} / 6</Badge>}><ul className="lobby-list">
         {lobby.party.map(mon => <li key={mon.slot}><span className="party-slot">{mon.slot + 1}</span><div><strong>{mon.isEgg ? 'Egg' : mon.nickname || mon.speciesName}</strong>
           <p>{mon.isEgg ? 'Keep it with you on your adventure.' : `${mon.speciesName} · Lv. ${mon.level} · ${mon.hp}/${mon.maxHp} HP`}</p></div></li>)}
-      </ul></LobbyPanel><TrainerDirectory key={lobby.sessionId} initialPage={trainerPage} disabled={leaving||busy||interaction} trading={trading} battles={battles} myLevel={myLevel}
-        onLive={setLiveBattles}
+      </ul></LobbyPanel><TrainerDirectory key={lobby.sessionId} initialPage={trainerPage} disabled={leaving||busy||interaction} trading={trading} battles={battles}
+        watchable={watchable} myLevel={myLevel} onWatchableChange={setWatchable} onLive={setLiveBattles}
         onTrade={id=>void invite(id)} onChallenge={id=>void action(async()=>{
-          const battle=await battleApi<BattleView>(httpBattles?'':'/challenge',{trainerId:id});setChallenges(items=>[battle,...items.filter(item=>item.id!==battle.id)]);
+          const battle=await battleApi<BattleView>(httpBattles?'':'/challenge',{trainerId:id,watchable});setChallenges(items=>[battle,...items.filter(item=>item.id!==battle.id)]);
         })}/></div>
     </> : <EmptyState icon={Users} title={available ? 'Enter from your adventure' : 'The online lobby is being built'} action={<Button size="lg" onClick={onAdventures}>Back to adventures<ArrowUpRight aria-hidden="true" /></Button>}>
       {available ? authenticated ? 'Stand still in the field, close menus, then choose Enter online lobby. Your current progress will be saved.' : 'Sign in and choose your trainer name to join other players.' : 'Battles and trades will open after the game core and verified saves are ready.'}</EmptyState>}

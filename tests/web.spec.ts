@@ -54,7 +54,7 @@ test('adventure selection, account forms and navigation work before game integra
 });
 
 test('lobby search, pages and trainer actions work beyond the first 100 names',async({page},info)=>{
-  const errors:string[]=[],actions:{kind:string;trainerId:string}[]=[],offeredTrades:unknown[]=[],offeredBattles:unknown[]=[],quickActions:string[]=[];
+  const errors:string[]=[],actions:{kind:string;trainerId:string;watchable?:boolean}[]=[],offeredTrades:unknown[]=[],offeredBattles:unknown[]=[],quickActions:string[]=[];
   page.on('pageerror',error=>errors.push(error.message));
   const trainers:LobbyTrainer[]=Array.from({length:150},(_,index)=>({
     id:`00000000-0000-4000-8000-${String(index+1000).padStart(12,'0')}`,
@@ -90,11 +90,11 @@ test('lobby search, pages and trainer actions work beyond the first 100 names',a
     else if(path==='/api/battles/quick'&&request.method()==='POST'){quickActions.push('queue');response={status:'waiting',maxLevel:0};}
     else if(path==='/api/battles/quick/cancel'&&request.method()==='POST'){quickActions.push('cancel');response={status:'idle'};}
     else if(request.method()==='POST'&&(path==='/api/trades'||path==='/api/battles/challenge')){
-      const {trainerId}=request.postDataJSON(),target=trainers.find(trainer=>trainer.id===trainerId)!;
-      actions.push({kind:path,trainerId});expect(target).toBeTruthy();
+      const {trainerId,watchable}=request.postDataJSON(),target=trainers.find(trainer=>trainer.id===trainerId)!;
+      actions.push(watchable===undefined?{kind:path,trainerId}:{kind:path,trainerId,watchable});expect(target).toBeTruthy();
       const common={id:'00000000-0000-4000-8000-000000009999',side:'a',status:'offered',expiresAt:Date.now()+60000,playerA:alice,playerB:target};
       response=path==='/api/trades'?{...common,offerRevision:0,offerA:null,offerB:null,confirmedA:false,confirmedB:false}
-        :{...common,playerA:{...alice,version:'firered'},rules:{format:'singles',levels:'earned',ranked:false},result:null};
+        :{...common,playerA:{...alice,version:'firered'},rules:{format:'singles',levels:'earned',ranked:false},result:null,watchable:watchable===true};
       (path==='/api/trades'?offeredTrades:offeredBattles).push(response);
     }else throw new Error(`Unexpected lobby fixture request: ${request.method()} ${path}`);
     await route.fulfill({contentType:'application/json',body:JSON.stringify(response)});
@@ -139,9 +139,12 @@ test('lobby search, pages and trainer actions work beyond the first 100 names',a
   await expect(rows).toHaveCount(1);await expect(rows.first()).toContainText('@Scout129');
   await rows.first().getByRole('button',{name:'Invite to trade',exact:true}).click();
   await expect(page.locator('.trade-card')).toContainText('@Alice ↔ @Scout129');
+  await directory.getByRole('checkbox',{name:'Allow spectators for new challenges'}).check();
   await rows.first().getByRole('button',{name:'Challenge to battle',exact:true}).click();
   await expect(page.getByRole('heading',{name:'@Alice vs @Scout129'})).toBeVisible();
-  expect(actions).toEqual([{kind:'/api/trades',trainerId:trainers[129]!.id},{kind:'/api/battles/challenge',trainerId:trainers[129]!.id}]);
+  await expect(page.locator('.trade-invitations').filter({hasText:'@Alice vs @Scout129'})).toContainText('spectators allowed');
+  expect(actions).toEqual([{kind:'/api/trades',trainerId:trainers[129]!.id},
+    {kind:'/api/battles/challenge',trainerId:trainers[129]!.id,watchable:true}]);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
   await page.screenshot({path:`test-output/screenshots/${process.env.KANTO_UI_EVIDENCE_TAG ?? ''}lobby-discovery-${info.project.name}.png`,fullPage:true});
   await field.fill('NoSuchTrainer');await directory.getByRole('button',{name:'Search trainers',exact:true}).click();
@@ -197,7 +200,7 @@ test('watch mode streams a read-only screen and follows the side toggle',async({
   const view=(side:'a'|'b')=>({id:battleId,side,status:'active',
     playerA:{id:'00000000-0000-4000-8000-000000000001',handle:'Scout001',version:'firered'},
     playerB:{id:'00000000-0000-4000-8000-000000000002',handle:'Scout002',version:'leafgreen'},
-    rules:{format:'singles',levels:'earned',ranked:false},expiresAt:Date.now()+3_600_000,result:null});
+    rules:{format:'singles',levels:'earned',ranked:false},expiresAt:Date.now()+3_600_000,result:null,watchable:true});
   const screen=(value:number)=>{const pixels=new Uint8Array(240*160*4);pixels[0]=value;pixels[3]=255;return pixels;};
   const pixel=()=>page.evaluate(()=>{
     const canvas=document.querySelector('canvas');if(!canvas)return [];

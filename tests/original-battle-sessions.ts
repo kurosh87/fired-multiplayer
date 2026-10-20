@@ -47,7 +47,8 @@ export async function checkOriginalBattleSessions(database:Database,owners:[stri
         from private.adventures where id=$1`,[saves[side]]);
     }
     const before=(await database.pool.query('select id,revision,flash from private.adventures where owner_id=any($1::uuid[]) order by id',[owners])).rows;
-    const challenge=await service.challenge(owners[0],owners[1]);
+    const challenge=await service.challenge(owners[0],owners[1],true);
+    assert.equal(challenge.watchable,true);
     const bootstrap=await service.accept(owners[1],challenge.id);assert.equal(bootstrap.battle.status,'active');
     assert(!('checkpoint' in bootstrap)&&!('manifest' in bootstrap)&&!('seed' in bootstrap));
     const store=new BattleRunStore(database);
@@ -62,6 +63,17 @@ export async function checkOriginalBattleSessions(database:Database,owners:[stri
     await database.pool.query(`insert into private.game_sessions(id,owner_id,adventure_id,artifact_id,seed,base_revision,status,lease_expires_at)
       select gen_random_uuid(),a.owner_id,a.id,'qualification-lobby',0,0,'lobby',clock_timestamp()+interval '60 seconds'
       from private.adventures a where a.owner_id=$1 and a.version='firered'`,[spectator]);
+    const listed=await service.liveBattlesFor(spectator);
+    assert(listed.some(battle=>battle.id===challenge.id&&battle.frame!==null),'An opted-in active battle is missing from the live list.');
+    await assert.rejects(service.liveBattlesFor(outsider),{code:'LOBBY_NOT_FOUND'});
+    // The live list and watch admission follow the per-battle opt-in. This is a
+    // direct row toggle so the same live original-C battle can exercise both
+    // states without opening a second pair of consoles.
+    await database.pool.query('update private.battles set watchable=false where id=$1',[challenge.id]);
+    const privateList=await service.liveBattlesFor(spectator);
+    assert(!privateList.some(battle=>battle.id===challenge.id),'A private battle stayed in the live list.');
+    await assert.rejects(service.watch(spectator,challenge.id,'a'),{code:'WATCH_DISABLED'});
+    await database.pool.query('update private.battles set watchable=true where id=$1',[challenge.id]);
     const watchedA=await service.watch(spectator,challenge.id,'a'),ownerA=await service.screen(owners[0],challenge.id);
     assert.equal(watchedA.frame,ownerA.frame);assert.deepEqual(watchedA.pixels,ownerA.pixels);assert.equal(watchedA.battle.side,'a');
     const watchedB=await service.watch(spectator,challenge.id,'b'),ownerB=await service.screen(owners[1],challenge.id);
@@ -108,7 +120,8 @@ export async function checkOriginalBattleSessions(database:Database,owners:[stri
     await writeFile('build/battle-service-report.json',JSON.stringify({artifacts:[registry.manifest('firered').id,registry.manifest('leafgreen').id],
       originalC:true,postgresJournal:true,checkpointAndJournalRecovery:true,recoveredFrame,staleWorkerRejected:true,
       sourceAdventuresUnchanged:true,privateScreensOnly:true,screenCounts:screens,decisionDeadlinePreserved:true,
-      spectatorPixelsMatchOwners:true,spectatorAdmissionEnforced:true,
+      spectatorPixelsMatchOwners:true,spectatorAdmissionEnforced:true,spectatorOptInEnforced:true,
+      liveListRequiresLobby:true,liveListWatchableOnly:true,
       isolatedConsoleWorkers:true,
       testClock:true,testInputPolicy:true,result:final.result,hostedAccountsQualified:false,publicReleaseQualified:false},null,2)+'\n');
     console.log(JSON.stringify({originalBattleService:true,recoveredFrame,screens,result:final.result}));

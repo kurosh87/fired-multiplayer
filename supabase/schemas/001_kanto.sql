@@ -83,6 +83,7 @@ create table if not exists private.battles (
   reservation_expires_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
+  watchable boolean not null default false,
   check (player_a <> player_b),
   check (adventure_a <> adventure_b),
   check ((status='finished')=(result is not null)),
@@ -94,6 +95,7 @@ create index if not exists battles_player_b on private.battles(player_b,created_
 create index if not exists battles_pending_a on private.battles(player_a,expires_at) where status='offered';
 create index if not exists battles_pending_b on private.battles(player_b,expires_at) where status='offered';
 create index if not exists battles_starting_expiry on private.battles(reservation_expires_at) where status='starting';
+create index if not exists battles_live_watchable on private.battles(updated_at desc) where status='active' and watchable;
 
 -- One lease owns both original consoles. Browser inputs contain buttons only;
 -- all transport blocks, checkpoints and canonical digests remain private.

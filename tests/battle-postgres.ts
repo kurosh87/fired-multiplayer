@@ -11,11 +11,14 @@ export async function checkBattleDatabase(database:Database,a:string,b:string):P
   try{
     const before=(await database.pool.query('select id,revision,flash from private.adventures order by id')).rows;
     const repository=new BattleRepository(database),store=new BattleRunStore(database),artifacts:[string,string]=['test-core-a','test-core-b'];
-    const invitation=await repository.challenge(a,b);
-    assert.equal(invitation.status,'offered');assert.deepEqual(invitation.rules,{format:'singles',levels:'earned',ranked:false});
+    const invitation=await repository.challenge(a,b,true);
+    assert.equal(invitation.status,'offered');assert.equal(invitation.watchable,true);
+    assert.deepEqual(invitation.rules,{format:'singles',levels:'earned',ranked:false});
     assert(!('seed' in invitation)&&!('flash' in invitation)&&!('party' in invitation));
     assert.equal((await repository.challenge(b,a)).id,invitation.id);
+    assert.equal((await repository.challenge(b,a)).watchable,true,'A reverse challenge changed the opt-in.');
     await assert.rejects(repository.challenge(a,a),{code:'INVALID_BATTLE'});
+    await assert.rejects(repository.challenge(a,b,'yes' as unknown as boolean),{code:'INVALID_CHALLENGE'});
     const outsider='00000000-0000-4000-8000-000000000099';
     await assert.rejects(repository.get(outsider,invitation.id),{code:'BATTLE_NOT_FOUND'});
     await assert.rejects(repository.reserve(a,invitation.id,artifacts,11),{code:'BATTLE_ACCEPT_FORBIDDEN'});
@@ -38,15 +41,19 @@ export async function checkBattleDatabase(database:Database,a:string,b:string):P
     await store.initialize(reserved,[Buffer.from('replacement-a'),Buffer.from('replacement-b')]);
     assert.equal((await repository.get(a,invitation.id)).status,'active');
     const live=(await repository.live()).find(entry=>entry.id===invitation.id);
-    assert(live,'An active battle is missing from the lobby live list.');
+    assert(live,'An opted-in active battle is missing from the lobby live list.');
     assert.equal(live.playerA.handle,'Alice');assert.equal(live.playerB.handle,'Bob');
     const versions=(await database.pool.query(`select aa.version as version_a,ab.version as version_b
       from private.battles b join private.adventures aa on aa.id=b.adventure_a
       join private.adventures ab on ab.id=b.adventure_b where b.id=$1`,[invitation.id])).rows[0];
     assert.equal(live.playerA.version,versions.version_a);assert.equal(live.playerB.version,versions.version_b);
     assert.equal(live.frame,null);assert(Number.isFinite(live.startedAt));
+    await database.pool.query('update private.battles set watchable=false where id=$1',[invitation.id]);
+    assert(!(await repository.live()).some(entry=>entry.id===invitation.id),'A private battle stayed in the lobby live list.');
+    await database.pool.query('update private.battles set watchable=true where id=$1',[invitation.id]);
+    assert((await repository.live()).some(entry=>entry.id===invitation.id),'Opting in did not restore the live list row.');
     const shared=await repository.watchView(invitation.id);
-    assert.equal(shared!.status,'active');assert.equal(shared!.side,'a');
+    assert.equal(shared!.status,'active');assert.equal(shared!.side,'a');assert.equal(shared!.watchable,true);
     assert.equal(await repository.watchView(outsider),null);
     assert.equal((await store.row(a,invitation.id)).initial_checkpoint_a.toString(),'initial-a','A retry reset the original consoles.');
     await assert.rejects(store.row(outsider,invitation.id),{code:'BATTLE_RUN_NOT_FOUND'});
@@ -116,6 +123,7 @@ export async function checkBattleDatabase(database:Database,a:string,b:string):P
     await repository.releaseStarting(expiring.id);await repository.releaseStarting(expiring.id);
     assert.equal((await repository.get(b,expiring.id)).status,'cancelled');
     const declining=await repository.challenge(a,b);
+    assert.equal(declining.watchable,false,'A battle did not start private by default.');
     assert.equal((await repository.decline(b,declining.id)).status,'cancelled');
     assert.equal((await repository.decline(a,declining.id)).status,'cancelled');
     await assert.rejects(database.transaction(async client=>{

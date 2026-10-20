@@ -4,7 +4,9 @@ import type {BattleResult,Side} from './session.ts';
 
 export type BattleView={id:string;side:Side;status:'offered'|'starting'|'active'|'finished'|'cancelled'|'expired';
   playerA:{id:string;handle:string;version:GameVersion};playerB:{id:string;handle:string;version:GameVersion};
-  rules:{format:'singles';levels:'earned';ranked:false};expiresAt:number;result:BattleResult|null};
+  rules:{format:'singles';levels:'earned';ranked:false};expiresAt:number;result:BattleResult|null;
+  /** Opt-in per battle; the challenger decides when creating the challenge. */
+  watchable:boolean};
 /** Public projection of a running battle for the lobby's live list. The frame
  * is only known to the node that hosts the battle; pixels never ride this row. */
 export type LiveBattle={id:string;playerA:{handle:string;version:GameVersion};playerB:{handle:string;version:GameVersion};

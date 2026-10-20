@@ -112,8 +112,9 @@ The same socket carries the lobby's live battle list. `battle:<id>` wake-ups on
 `kanto_lobby` are emitted in the transaction that makes a battle `active` and in
 the one that finishes it (forfeit, timeout, disconnect and engine-error results
 included), so a rolled-back transition never announces a battle. `LobbyPresence` re-reads the
-bounded public projection and publishes one `live` message holding the full
-list; a frame is filled in only by the node that hosts that battle's consoles,
+bounded public projection (only battles whose challenger opted in) and publishes
+one `live` message holding the full list; a frame is filled in only by the node
+that hosts that battle's consoles,
 and a frame-only change is not republished. A failed read leaves the list
 unsupported until the next wake-up or reconcile, so a client never receives a
 false empty list, and a service without a battle reader sends no `live` message
@@ -123,8 +124,10 @@ than a new source of truth.
 
 ## Spectating
 
-`GET /api/battles/live` is the authenticated lobby projection of battles whose
-SQL status is `active`: up to 50 rows ordered by `updated_at` descending with
+`GET /api/battles/live` requires an unsuspended account with a live lobby
+session — the same admission as spectating — and projects only battles whose SQL
+status is `active` and whose challenger opted in to spectators: up to 50 rows
+ordered by `updated_at` descending with
 both handles, both editions, a frame when the answering worker hosts the battle
 (`null` otherwise) and `startedAt` from the committed row. It reads only the
 battle, profile and adventure tables — never a console, journal, save or input —
@@ -133,13 +136,24 @@ routes the list by verified owner (like `challenge`, `quick` and
 `quick/cancel`). Only `/api/battles/:id…` and the battle socket pin work to the
 worker that hosts the original consoles.
 
+A directory challenge sends `{trainerId,watchable}`. `watchable` defaults to
+`false` and is fixed when the challenge row is created; the challenged
+trainer's reverse challenge does not change the choice. Quick match always
+creates a private battle: queueing is consent to battle, not consent to being
+watched. If the same pair already has a watchable offered challenge, quick match
+declines that offer and creates a private replacement instead of silently
+starting it. The trainer directory offers one checkbox for new challenges, and
+the challenge card shows when spectators are allowed. A direct watch attempt on
+a private battle closes with `WATCH_DISABLED` (403) instead of exposing pixels.
+
 Spectating uses the existing `/api/battle-play` socket with
 `{type:'authenticate',protocol:1,token,battleId,watch:{side:'a'|'b'}}`. The
 server admits only profile-present, unsuspended accounts with a live lobby
 session, then requires a non-poisoned in-process battle whose SQL status is
-still `active`. The reply is the usual `ready` (`battle.side` is the watched
-side) plus the first encoded keyframe for that side; afterwards the spectator
-receives the same encoded screen packets an owner would receive. No input is
+still `active` and whose row is watchable. The reply is the usual `ready`
+(`battle.side` is the watched side) plus the first encoded keyframe for that
+side; afterwards the spectator receives the same encoded screen packets an owner
+would receive. No input is
 accepted: anything except `refresh-auth` closes the socket with `1008`. At most
 ten spectators watch one battle (`1013` when full), one watch is allowed per
 account (a new socket replaces the old with `Watch resumed in another window`),
@@ -179,6 +193,13 @@ migration in order on a fresh PostgreSQL 18 database before the account, role,
 HTTP-battle and browser checks. Latest evidence:
 `build/database-migrations-v3/report.json` and
 `build/netlify-accounts-check-1792259862358/report.json` (October 17 UTC).
+
+`supabase/migrations/20261019120000_watchable-battles.sql` and
+`netlify/database/migrations/20261019120000_watchable-battles/migration.sql`
+add the opt-in `private.battles.watchable` column and its partial live-list
+index. The change is prepared in the migration chain but has not been applied to
+the hosted preview; the public solo deployment and every capability flag remain
+unchanged.
 
 ## Qualification status
 
@@ -267,6 +288,33 @@ replacements, and no `live` message from a service without a battle reader);
 `tests/lobby-presence-journey.ts` (a committed `battle:` NOTIFY delivered to a
 real dedicated listener); and `tests/web.spec.ts` (a pushed live list replaces
 the panel without waiting for the poll).
+
+Slice 2 milestone 4 (opt-in watchable and live-list lobby admission) covers:
+`tests/battle-postgres.ts` (the opt-in persisted at creation, a reverse
+challenge preserving it, private battles excluded from the live projection, the
+watch view exposing the flag and default-private challenges);
+`tests/battle-watch.test.ts` (the live list sharing the lobby admission, and
+quick match replacing a reusable watchable challenge with a private one);
+`tests/battle-watch-api.test.ts` (`WATCH_DISABLED`, the live list passing the
+authenticated owner to the admission boundary, and a no-lobby response);
+`tests/quick-match-http.ts` (an opted-in challenge, an invalid flag and the live
+list closing outside the lobby or while suspended); and `tests/web.spec.ts`
+(the opt-in checkbox and the challenge card). `tests/original-battle-sessions.ts`
+toggles a real original-C battle private and back, proving `WATCH_DISABLED`,
+live-list exclusion and restoration.
+
+The slice 2 milestone 4 local verification completed on October 20 UTC under the
+operator-authorized task-local disk reserve
+(`scripts/run-local.py --allow-low-disk --min-free-gib 6`): `npm run typecheck`;
+`npm test` (132 tests, 131 pass, one skip — the disposable database contract
+runs in its own lane); the disposable database contract
+(`python3 -B scripts/check-database.py`, real Postgres 17); the migration chain
+with schema parity (`build/database-migrations-v4-watchable`); the original-C
+engine lane (`KANTO_CHECK_ORIGINAL_BATTLES=1`, report rewritten with the new
+opt-in and live-list flags); and the browser lane
+(`node --experimental-strip-types scripts/check-web-local.ts build/web-watchable`,
+12/12 on desktop and mobile plus the production compile). No production
+migration, capability flag or public admission changed.
 
 The local native run for slice 2 milestones 2 and 3 completed on October 19 UTC
 under the operator-authorized task-local disk reserve

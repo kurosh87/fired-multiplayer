@@ -22,14 +22,16 @@ export function registerBattleApi(app:FastifyInstance,service:BattleSessions|und
   const watchers=new Map<string,{socket:WebSocket;battleId:string;side:WatchSide;encoder:BattleScreenEncoder}>();
   app.get('/api/battles',async request=>({battles:await requireService().list(await owner(request.headers.authorization))}));
   app.get('/api/battles/live',async request=>{
-    await owner(request.headers.authorization);
-    return {battles:await requireService().liveBattles()};
+    const id=await owner(request.headers.authorization);
+    return {battles:await requireService().liveBattlesFor(id)};
   });
   app.get<{Params:{id:string}}>('/api/battles/:id',async request=>requireService().get(await owner(request.headers.authorization),request.params.id));
   app.post('/api/battles/challenge',async request=>{
     const id=await owner(request.headers.authorization);assertRecord(request.body);
-    if(Object.keys(request.body).some(key=>key!=='trainerId'))throw new DomainError('INVALID_CHALLENGE','Choose a trainer to challenge.');
-    return requireService().challenge(id,request.body.trainerId as string);
+    if(Object.keys(request.body).some(key=>!['trainerId','watchable'].includes(key))
+      ||'watchable' in request.body&&typeof request.body.watchable!=='boolean')
+      throw new DomainError('INVALID_CHALLENGE','Choose a trainer and whether spectators may watch.');
+    return requireService().challenge(id,request.body.trainerId as string,request.body.watchable===true);
   });
   for(const action of ['accept','open','decline','forfeit'] as const)
     app.post<{Params:{id:string}}>(`/api/battles/:id/${action}`,async request=>{

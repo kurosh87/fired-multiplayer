@@ -9,5 +9,5 @@ createRoot(document.getElementById('root')!).render(<Battle battle={{
   playerA: { id: 'a', handle: 'Alice', version: 'firered' },
   playerB: { id: 'b', handle: 'Bob', version },
   rules: { format: 'singles', levels: 'earned', ranked: false }, expiresAt: 0,
-  result: { winner: null, reason: 'finished' },
+  result: { winner: null, reason: 'finished' }, watchable: false,
 }} onExit={() => { location.hash = 'lobby'; }} />);

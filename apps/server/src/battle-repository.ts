@@ -9,7 +9,7 @@ import {notifyLobbyPresence,notifyLiveBattle} from './lobby-presence.ts';
 type BattleRow={id:string;player_a:string;player_b:string;adventure_a:string;adventure_b:string;
   revision_a:string;revision_b:string;status:BattleView['status'];handle_a:string;handle_b:string;
   version_a:string;version_b:string;expires_at:Date;reservation_expires_at:Date|null;seed:string|null;
-  artifact_a:string|null;artifact_b:string|null;result:BattleResult|null;updated_at:Date};
+  artifact_a:string|null;artifact_b:string|null;result:BattleResult|null;updated_at:Date;watchable:boolean};
 const selection=`select b.*,pa.handle as handle_a,pb.handle as handle_b,aa.version as version_a,ab.version as version_b
   from private.battles b join public.profiles pa on pa.id=b.player_a join public.profiles pb on pb.id=b.player_b
   join private.adventures aa on aa.id=b.adventure_a join private.adventures ab on ab.id=b.adventure_b`;
@@ -19,7 +19,8 @@ function view(row:BattleRow,owner:string):BattleView{
     status:row.status==='offered'&&row.expires_at.getTime()<=Date.now()?'expired':row.status,
     playerA:{id:row.player_a,handle:row.handle_a,version:gameVersion(row.version_a)},
     playerB:{id:row.player_b,handle:row.handle_b,version:gameVersion(row.version_b)},
-    rules:{format:'singles',levels:'earned',ranked:false},expiresAt:row.expires_at.getTime(),result:row.result};
+    rules:{format:'singles',levels:'earned',ranked:false},expiresAt:row.expires_at.getTime(),result:row.result,
+    watchable:row.watchable};
 }
 
 /** Admission/result transactions never write an adventure cartridge. Battle
@@ -58,10 +59,11 @@ export class BattleRepository{
       and (b.status in ('starting','active') or b.status='offered' and b.expires_at>clock_timestamp()) order by b.created_at desc limit 32`,[owner]);
     return result.rows.map(row=>view(row,owner));
   }
-  /** Public projection of running battles for the lobby's live list. Frames are
-   * filled in by the node that hosts the battle; no console or journal reads. */
+  /** Public projection of running battles for the lobby's live list. Only
+   * battles whose challenger opted in are public; frames are filled in by the
+   * node that hosts the battle, and no console or journal is read. */
   async live():Promise<LiveBattle[]>{
-    const result=await this.database.pool.query<BattleRow>(`${selection} where b.status='active'
+    const result=await this.database.pool.query<BattleRow>(`${selection} where b.status='active' and b.watchable
       order by b.updated_at desc limit 50`);
     return result.rows.map(row=>({id:row.id,
       playerA:{handle:row.handle_a,version:gameVersion(row.version_a)},
@@ -74,8 +76,9 @@ export class BattleRepository{
     const result=await this.database.pool.query<BattleRow>(`${selection} where b.id=$1`,[battleId(id)]);
     const row=result.rows[0];return row?view(row,row.player_a):null;
   }
-  async challenge(owner:string,peer:string):Promise<BattleView>{
+  async challenge(owner:string,peer:string,watchable=false):Promise<BattleView>{
     peer=battleId(peer);if(peer===owner)throw new DomainError('INVALID_BATTLE','Choose another trainer.');
+    if(typeof watchable!=='boolean')throw new DomainError('INVALID_CHALLENGE','Choose whether spectators may watch.',400);
     return this.database.transaction(async client=>{
       const profiles=await client.query('select id from public.profiles where id in ($1,$2) order by id for update',[owner,peer]);
       if(profiles.rows.length!==2)throw new DomainError('TRAINER_NOT_FOUND','That trainer was not found.',404);
@@ -91,8 +94,9 @@ export class BattleRepository{
       if(!a||!b)throw new DomainError('TRAINER_NOT_READY','Both trainers must be in the lobby.',409);
       const saves=await this.saves(client,{player_a:owner,player_b:peer,adventure_a:a.adventure_id,adventure_b:b.adventure_id},'lobby');
       this.ready?.(saves);
-      const inserted=await client.query(`insert into private.battles(player_a,player_b,adventure_a,adventure_b,revision_a,revision_b,expires_at)
-        values($1,$2,$3,$4,$5,$6,clock_timestamp()+interval '5 minutes') returning id`,[owner,peer,saves[0].id,saves[1].id,saves[0].revision,saves[1].revision]);
+      const inserted=await client.query(`insert into private.battles(player_a,player_b,adventure_a,adventure_b,revision_a,revision_b,expires_at,watchable)
+        values($1,$2,$3,$4,$5,$6,clock_timestamp()+interval '5 minutes',$7) returning id`,
+        [owner,peer,saves[0].id,saves[1].id,saves[0].revision,saves[1].revision,watchable]);
       return view(await this.owned(client,inserted.rows[0].id,owner),owner);
     });
   }

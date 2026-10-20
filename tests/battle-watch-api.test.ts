@@ -17,21 +17,28 @@ const ORIGIN='https://kanto-fixture.invalid';
 const pixels=(value:number)=>{const bytes=new Uint8Array(240*160*4);bytes.fill(value);return bytes;};
 const view=(side:'a'|'b'):BattleView=>({id:BATTLE,side,status:'active',
   playerA:{id:'alice',handle:'Alice',version:'firered'},playerB:{id:'bob',handle:'Bob',version:'leafgreen'},
-  rules:{format:'singles',levels:'earned',ranked:false},expiresAt:Date.now()+3_600_000,result:null});
+  rules:{format:'singles',levels:'earned',ranked:false},expiresAt:Date.now()+3_600_000,result:null,watchable:true});
 
 function fixture(){
   return Object.assign(new EventEmitter(),{
-    watchCalls:0,inputCalls:0,
-    async liveBattles(){return [{id:BATTLE,playerA:{handle:'Alice',version:'firered'},
-      playerB:{handle:'Bob',version:'leafgreen'},frame:12,startedAt:Date.now()}]},
+    watchCalls:0,inputCalls:0,liveOwners:[] as string[],watchDenied:false,liveDenied:false,
+    async liveBattlesFor(owner:string){
+      this.liveOwners.push(owner);
+      if(this.liveDenied)throw new DomainError('LOBBY_NOT_FOUND','Enter the lobby from your adventure first.',409);
+      return [{id:BATTLE,playerA:{handle:'Alice',version:'firered'},
+        playerB:{handle:'Bob',version:'leafgreen'},frame:12,startedAt:Date.now()}];
+    },
     async list(){return [];},
     async get(){return view('a');},
     async connect(){return {epoch:7,nextSequence:4,frame:12};},
     async screen(){return {frame:12,pixels:pixels(5)};},
     async watch(_owner:string,_id:string,side:'a'|'b'){
       this.watchCalls++;
+      if(this.watchDenied)throw new DomainError('WATCH_DISABLED','This trainer has not opened their battle to spectators.',403);
       return {frame:12,pixels:pixels(side==='a'?1:2),battle:view(side)};
     },
+    challengeCalls:[] as boolean[],
+    async challenge(_owner:string,_peer:string,watchable=false){this.challengeCalls.push(watchable);return view('a');},
     async input(){this.inputCalls++;return {type:'buttons-accepted',protocol:1,sequence:0,operationId:'ignored',frame:12};},
     async disconnect(){},async tick(){},async expire(){},async close(){},
   });
@@ -112,6 +119,20 @@ test('spectators receive only their chosen side and no owner traffic',async()=>{
     assert.equal(a.binary.length,2);assert.equal(b.binary.length,2);
     assert.equal(service.inputCalls,0);assert.equal(service.watchCalls,2);
   }finally{a.socket.terminate();b.socket.terminate();await close();}
+});
+
+test('a battle that has not opted in rejects spectators',async()=>{
+  const {service,url,close}=await harness();
+  const watcher=await Client.open(url);
+  try{
+    service.watchDenied=true;
+    watcher.send({type:'authenticate',protocol:1,token:'watcher',battleId:BATTLE,watch:{side:'a'}});
+    const error=await watcher.waitJson('error');
+    assert.equal(error.error,'WATCH_DISABLED');
+    assert.equal(error.message,'This trainer has not opened their battle to spectators.');
+    assert.equal((await watcher.waitClosed()).code,1008);
+    assert.equal(service.watchCalls,1);
+  }finally{watcher.socket.terminate();await close();}
 });
 
 test('watching is read-only and invalid watch requests are rejected',async()=>{
@@ -197,8 +218,24 @@ test('watch connections renew authentication without gaining controls',async()=>
   }finally{watcher.socket.terminate();await close();}
 });
 
-test('the live battle list requires authentication and returns public rows only',async()=>{
-  const {app,close}=await harness();
+test('the challenge route validates and forwards the spectator choice',async()=>{
+  const {service,app,close}=await harness();
+  try{
+    const trainer='00000000-0000-4000-8000-000000000004',headers={authorization:'Bearer alice'};
+    const malformed=await app.inject({method:'POST',url:'/api/battles/challenge',headers,payload:{trainerId:trainer,watchable:'yes'}});
+    assert.equal(malformed.statusCode,400,malformed.body);assert.equal(malformed.json().error,'INVALID_CHALLENGE');
+    const extra=await app.inject({method:'POST',url:'/api/battles/challenge',headers,payload:{trainerId:trainer,watchable:true,side:'a'}});
+    assert.equal(extra.statusCode,400,extra.body);assert.equal(extra.json().error,'INVALID_CHALLENGE');
+    assert.deepEqual(service.challengeCalls,[]);
+    assert.equal((await app.inject({method:'POST',url:'/api/battles/challenge',headers,payload:{trainerId:trainer,watchable:true}})).statusCode,200);
+    assert.deepEqual(service.challengeCalls,[true]);
+    assert.equal((await app.inject({method:'POST',url:'/api/battles/challenge',headers,payload:{trainerId:trainer}})).statusCode,200);
+    assert.deepEqual(service.challengeCalls,[true,false],'A missing flag did not default to private.');
+  }finally{await close();}
+});
+
+test('the live battle list requires authentication, lobby membership and public rows only',async()=>{
+  const {service,app,close}=await harness();
   try{
     assert.equal((await app.inject({method:'GET',url:'/api/battles/live'})).statusCode,401);
     const response=await app.inject({method:'GET',url:'/api/battles/live',headers:{authorization:'Bearer watcher'}});
@@ -207,5 +244,10 @@ test('the live battle list requires authentication and returns public rows only'
       playerB:{handle:'Bob',version:'leafgreen'},frame:12,startedAt:response.json().battles[0].startedAt}]});
     assert(Number.isFinite(response.json().battles[0].startedAt));
     assert(!('artifact' in response.json().battles[0])&&!('seed' in response.json().battles[0]));
+    assert.deepEqual(service.liveOwners,['watcher']);
+    service.liveDenied=true;
+    const denied=await app.inject({method:'GET',url:'/api/battles/live',headers:{authorization:'Bearer watcher'}});
+    assert.equal(denied.statusCode,409,denied.body);
+    assert.equal(denied.json().error,'LOBBY_NOT_FOUND');
   }finally{await close();}
 });

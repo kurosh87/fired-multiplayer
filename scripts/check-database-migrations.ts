@@ -115,6 +115,7 @@ try{
   for(const [owner,save] of [[owners[0],aSave],[owners[1],bSave]] as const)await runtime.pool.query(`insert into private.game_sessions(id,owner_id,adventure_id,artifact_id,seed,base_revision,status)
     values($1,$2,$3,'migration-fixture',123,$4,'lobby')`,[randomUUID(),owner,save.id,save.revision]);
   const battles=new BattleRepository(runtime),challenge=await battles.challenge(owners[0]!,owners[1]!);
+  assert.equal(challenge.watchable,false,'A migrated battle did not default to private spectating.');
   await assert.rejects(battles.get(owners[2]!,challenge.id),{code:'BATTLE_NOT_FOUND'});
   await battles.reserve(owners[1]!,challenge.id,['fixture-a','fixture-b'],123);await battles.releaseStarting(challenge.id);
   assert.equal((await battles.get(owners[0]!,challenge.id)).status,'cancelled');

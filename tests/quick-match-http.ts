@@ -28,6 +28,21 @@ export async function checkQuickMatchHttp(database:Database,app:FastifyInstance,
     const status=await app.inject({method:'GET',url:'/api/status'});
     assert.equal(status.statusCode,200,status.body);
     const battleReady=status.json().multiplayer.battles===true;
+    // The live list follows the same lobby-session admission as spectating.
+    const live=await app.inject({method:'GET',url:'/api/battles/live',headers:alice});
+    assert.equal(live.statusCode,200,live.body);assert.deepEqual(live.json(),{battles:[]});
+    // A valid spectator flag reaches the service; without a battle-capable
+    // artifact the challenge then stops at the engine gate. A malformed flag
+    // is rejected before any battle work.
+    const optedIn=await app.inject({method:'POST',url:'/api/battles/challenge',headers:alice,payload:{trainerId:b,watchable:true}});
+    if(battleReady){
+      assert.equal(optedIn.statusCode,200,optedIn.body);assert.equal(optedIn.json().watchable,true);
+      assert.equal((await app.inject({method:'POST',url:`/api/battles/${optedIn.json().id}/decline`,headers:bob,payload:{}})).statusCode,200);
+    }else{
+      assert.equal(optedIn.statusCode,503,optedIn.body);assert.equal(optedIn.json().error,'ENGINE_UNAVAILABLE');
+    }
+    const invalidWatchable=await app.inject({method:'POST',url:'/api/battles/challenge',headers:alice,payload:{trainerId:b,watchable:'yes'}});
+    assert.equal(invalidWatchable.statusCode,400,invalidWatchable.body);assert.equal(invalidWatchable.json().error,'INVALID_CHALLENGE');
     // Unauthenticated or nonempty bodies never touch the queue.
     assert.equal((await app.inject({method:'POST',url:'/api/battles/quick'})).statusCode,401);
     const junk=await app.inject({method:'POST',url:'/api/battles/quick',headers:alice,payload:{level:5}});
@@ -79,5 +94,13 @@ export async function checkQuickMatchHttp(database:Database,app:FastifyInstance,
       'Leaving the lobby left its presence snapshot behind.');
     const refused=await app.inject({method:'POST',url:'/api/battles/quick',headers:bob,payload:{}});
     assert.equal(refused.statusCode,409,refused.body);assert.equal(refused.json().error,'TRAINER_NOT_READY');
+    // The live list is not an auth-only directory: leaving the lobby or being
+    // suspended closes it even though the account can still authenticate.
+    const outside=await app.inject({method:'GET',url:'/api/battles/live',headers:bob});
+    assert.equal(outside.statusCode,409,outside.body);assert.equal(outside.json().error,'LOBBY_NOT_FOUND');
+    await database.pool.query('update public.profiles set suspended_at=now() where id=$1',[a]);
+    const suspended=await app.inject({method:'GET',url:'/api/battles/live',headers:alice});
+    assert.equal(suspended.statusCode,403,suspended.body);assert.equal(suspended.json().error,'ACCOUNT_SUSPENDED');
+    await database.pool.query('update public.profiles set suspended_at=null where id=$1',[a]);
   }finally{await database.pool.query('rollback to savepoint quick_match_http_contract');}
 }

@@ -41,8 +41,10 @@ export function requestBattleHttp(service: RequestBattles, authenticate: (author
       const body = await jsonBody(request);
       if (!id) {
         assertRecord(body);
-        if (Object.keys(body).some(key=>key!=='trainerId')) throw new DomainError('INVALID_BATTLE_REQUEST','Choose a trainer to challenge.');
-        return Response.json(await service.repository.challenge(owner,battleId(body.trainerId)),{headers});
+        if (Object.keys(body).some(key=>!['trainerId','watchable'].includes(key))
+          || 'watchable' in body && typeof body.watchable !== 'boolean')
+          throw new DomainError('INVALID_BATTLE_REQUEST','Choose a trainer and whether spectators may watch.');
+        return Response.json(await service.repository.challenge(owner,battleId(body.trainerId),body.watchable===true),{headers});
       }
       if (action === 'step') return new Response(new Uint8Array(await service.step(owner,id,body)),{
         headers:{...headers,'Content-Type':'application/vnd.kanto.battle-response','Content-Encoding':'gzip'}});

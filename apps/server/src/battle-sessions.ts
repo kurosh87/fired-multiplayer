@@ -50,7 +50,7 @@ export class BattleSessions extends EventEmitter{
       return {bytes:this.registry.artifact(version),manifest,seed};
     }) as [BattleArtifact,BattleArtifact];
   }
-  challenge(owner:string,peer:string):Promise<BattleView>{return this.repository.challenge(owner,peer);}
+  challenge(owner:string,peer:string,watchable=false):Promise<BattleView>{return this.repository.challenge(owner,peer,watchable);}
   get(owner:string,id:string):Promise<BattleView>{return this.repository.get(owner,id);}
   list(owner:string):Promise<BattleView[]>{return this.repository.list(owner);}
   async accept(owner:string,id:string):Promise<BattleBootstrap>{
@@ -62,7 +62,16 @@ export class BattleSessions extends EventEmitter{
    * the challenge and accepts it in one step. A start that fails this far
    * declines its own offer instead of leaving it to expire. */
   async quickPair(challenger:string,challenged:string):Promise<BattleBootstrap>{
-    const offered=await this.repository.challenge(challenger,challenged);
+    // Queueing is consent to battle, not consent to being watched. A quick
+    // match therefore starts private; only an explicit directory challenge can
+    // opt in to spectators. A reusable directory challenge may already be
+    // watchable, so decline it and create a private replacement instead of
+    // silently starting it.
+    let offered=await this.repository.challenge(challenger,challenged,false);
+    if(offered.watchable){
+      await this.repository.decline(challenged,offered.id);
+      offered=await this.repository.challenge(challenger,challenged,false);
+    }
     try{return await this.accept(challenged,offered.id);}
     catch(error){
       try{await this.repository.decline(challenged,offered.id);}catch{/* The offer expires on its own. */}
@@ -228,16 +237,7 @@ export class BattleSessions extends EventEmitter{
     return this.exclusive(id,async()=>{const {live,side}=this.owned(owner,id);
       return {frame:live.pair.frame,pixels:(await live.pair.screens([side===0?'a':'b']))[0]!};});
   }
-  /** The lobby list is SQL truth plus whatever frame this node actually hosts;
-   * non-owning workers report null frames rather than guessing. */
-  async liveBattles():Promise<LiveBattle[]>{
-    const battles=await this.repository.live();
-    return battles.map(battle=>({...battle,frame:this.live.get(battle.id)?.pair.frame??null}));
-  }
-  /** Spectators need a live lobby session and an unsuspended account; they
-   * receive the same rendered pixels an owner sees and nothing else. */
-  async watch(owner:string,id:string,side:WatchSide):Promise<BattleWatch>{
-    const battle=battleId(id);
+  private async lobbyMember(owner:string):Promise<void>{
     const admission=await this.database.pool.query<{suspended_at:Date|null;in_lobby:boolean}>(
       `select p.suspended_at,exists(select 1 from private.game_sessions s
         where s.owner_id=p.id and s.status='lobby' and s.lease_expires_at>clock_timestamp()) as in_lobby
@@ -246,11 +246,33 @@ export class BattleSessions extends EventEmitter{
     if(!profile)throw new DomainError('TRAINER_NOT_FOUND','That trainer was not found.',404);
     if(profile.suspended_at)throw new DomainError('ACCOUNT_SUSPENDED','This account cannot enter online play.',403);
     if(!profile.in_lobby)throw new DomainError('LOBBY_NOT_FOUND','Enter the lobby from your adventure first.',409);
+  }
+  /** The lobby list is SQL truth plus whatever frame this node actually hosts;
+   * non-owning workers report null frames rather than guessing. This is the
+   * server-internal projection used by the presence push; HTTP callers must use
+   * `liveBattlesFor`, which enforces the lobby-session admission boundary. */
+  async liveBattles():Promise<LiveBattle[]>{
+    const battles=await this.repository.live();
+    return battles.map(battle=>({...battle,frame:this.live.get(battle.id)?.pair.frame??null}));
+  }
+  /** The live list follows the same lobby-session and suspension contract as
+   * spectating, so a signed-in account outside the lobby cannot browse it. */
+  async liveBattlesFor(owner:string):Promise<LiveBattle[]>{
+    await this.lobbyMember(owner);
+    return this.liveBattles();
+  }
+  /** Spectators need a live lobby session, an unsuspended account and a battle
+   * whose challenger opted in; they receive the same rendered pixels an owner
+   * sees and nothing else. */
+  async watch(owner:string,id:string,side:WatchSide):Promise<BattleWatch>{
+    const battle=battleId(id);
+    await this.lobbyMember(owner);
     return this.exclusive(battle,async()=>{
       const live=this.live.get(battle);
       if(!live||live.poisoned)throw new DomainError('BATTLE_NOT_FOUND','That live battle is no longer available.',404);
       const view=await this.repository.watchView(battle);
       if(!view||view.status!=='active')throw new DomainError('BATTLE_NOT_FOUND','That live battle is no longer available.',404);
+      if(!view.watchable)throw new DomainError('WATCH_DISABLED','This trainer has not opened their battle to spectators.',403);
       return {frame:live.pair.frame,pixels:(await live.pair.screens([side]))[0]!,battle:{...view,side}};
     });
   }

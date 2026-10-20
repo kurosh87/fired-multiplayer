@@ -24,6 +24,8 @@
 
 .trainer-directory .lobby-list li { gap: 10px; }
 .trainer-filters { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.trainer-watchable { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 12px; color: var(--text-muted); cursor: pointer; }
+.trainer-watchable input { width: 16px; height: 16px; margin: 0; accent-color: var(--foreground); }
 .party-preview { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; }
 .party-preview-chip { display: inline-flex; align-items: baseline; gap: 5px; padding: 2px 8px; border: 1px solid var(--border); border-radius: 999px; font-size: 12px; background: var(--secondary); color: var(--secondary-foreground); }
 .party-preview-chip em { font-style: normal; opacity: .75; font-variant-numeric: tabular-nums; }

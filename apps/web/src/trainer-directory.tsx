@@ -15,9 +15,9 @@ import type {LiveBattle} from '../../../packages/battles/protocol.ts';
 
 /** Each page refreshes independently. A search/page change invalidates the
  * previous request, including a poll already in flight. */
-export function TrainerDirectory({initialPage,disabled,trading,battles,myLevel,onTrade,onChallenge,onLive}:{
-  initialPage:LobbyTrainerPage;disabled:boolean;trading:boolean;battles:boolean;myLevel:number;
-  onTrade(id:string):void;onChallenge(id:string):void;onLive?(battles:LiveBattle[]):void;
+export function TrainerDirectory({initialPage,disabled,trading,battles,watchable,myLevel,onTrade,onChallenge,onWatchableChange,onLive}:{
+  initialPage:LobbyTrainerPage;disabled:boolean;trading:boolean;battles:boolean;watchable:boolean;myLevel:number;
+  onTrade(id:string):void;onChallenge(id:string):void;onWatchableChange(value:boolean):void;onLive?(battles:LiveBattle[]):void;
 }){
   const [page,setPage]=useState(initialPage),[draft,setDraft]=useState(''),[search,setSearch]=useState('');
   const [edition,setEdition]=useState(''),[near,setNear]=useState(false);
@@ -77,6 +77,8 @@ export function TrainerDirectory({initialPage,disabled,trading,battles,myLevel,o
       <Button variant={near?'secondary':'outline'} size="sm" type="button" aria-pressed={near} disabled={disabled||myLevel<1}
         onClick={()=>refilter(()=>setNear(value=>!value))}><Sparkles aria-hidden="true" />Near my level</Button>
     </div>
+    {battles&&<label className="trainer-watchable"><input type="checkbox" checked={watchable} disabled={disabled}
+      onChange={event=>onWatchableChange(event.target.checked)} /><span>Allow spectators for new challenges</span></label>}
     {error&&<StatusMessage destructive>{error}</StatusMessage>}
     <p className="trainer-page-status" role="status">{loading?'Finding trainers…':`Page ${cursors.length} · ${page.trainers.length} trainer${page.trainers.length===1?'':'s'}${live?' · live updates':''}`}</p>
     <div aria-busy={loading}>
@@ -98,6 +100,6 @@ export function TrainerDirectory({initialPage,disabled,trading,battles,myLevel,o
       <Button variant="ghost" size="sm" disabled={disabled||loading} onClick={()=>{setLoading(true);setRefreshToken(value=>value+1);}}><RefreshCw aria-hidden="true" />Refresh trainers</Button>
     </nav>
     <p className="lobby-note">Search ignores letter case. Only trainers currently waiting in the lobby appear. Party levels come from each trainer's saved game.</p>
-    <p className="lobby-note">{trading?'Both trainers review their offers before starting the original trade scene.':'Trade invitations are being qualified.'} {battles?'Battle with your own party at the levels earned on your adventure.':'Battle challenges are being qualified.'}</p>
+    <p className="lobby-note">{trading?'Both trainers review their offers before starting the original trade scene.':'Trade invitations are being qualified.'} {battles?'Challenges start private to the two trainers; tick the box before challenging to let lobby trainers watch. Quick matches always stay private.':'Battle challenges are being qualified.'}</p>
   </LobbyPanel>;
 }
