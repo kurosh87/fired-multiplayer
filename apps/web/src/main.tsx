@@ -14,6 +14,7 @@ import {useAccountSession,accountAction,accountsConfigured,cloudAccountsEnabled,
 import type { AdventureSummary, GameVersion, PublicProfile } from '../../../packages/protocol/index.ts';
 import { ScreenLoader } from './components/screen-loader.tsx';
 import type {BattleView, LiveBattle, WatchSide} from '../../../packages/battles/protocol.ts';
+import type {TradeView} from '../../../packages/trading/offers.ts';
 import type { TradeSceneBootstrap } from '../../server/src/trade-scenes.ts';
 import type { SessionBootstrap } from '../../server/src/sessions.ts';
 import './theme.css';
@@ -48,6 +49,7 @@ function App() {
   const [battle,setBattle]=useState<BattleView>();
   const [watching,setWatching]=useState<{battle:LiveBattle;side:WatchSide}>();
   const [resumeBootstrap, setResumeBootstrap] = useState<SessionBootstrap | TradeSceneBootstrap>();
+  const [onlineResume, setOnlineResume] = useState<{battles:number;trades:number}>();
   const [busy, setBusy] = useState(false);
   const [onboarding, setOnboarding] = useState(false);
   const dialogReturnFocus = useRef<HTMLElement | null>(null);
@@ -66,7 +68,7 @@ function App() {
   useEffect(() => {
     let current = true;
     // A different account must not inherit the previous trainer's visible state.
-    setProfile(null); setAdventures([]); setOnboarding(false); setPlaying(undefined);setPlayingAdventure(undefined); setBattle(undefined); setWatching(undefined); setResumeBootstrap(undefined);
+    setProfile(null); setAdventures([]); setOnboarding(false); setPlaying(undefined);setPlayingAdventure(undefined); setBattle(undefined); setWatching(undefined); setResumeBootstrap(undefined); setOnlineResume(undefined);
     if (!session) return;
     void api<{ profile: PublicProfile | null }>('/api/profile').then(result => {
       if (!current) return;
@@ -85,6 +87,30 @@ function App() {
     }).catch(error => { if (current) setNotice(error.message); });
     return () => { current = false; };
   }, [profile?.id, session?.user.id, playing, battle, view]);
+
+  useEffect(() => {
+    // A reload during a match should not bury the resume path in the lobby.
+    // This is an advisory summary only; the lobby remains authoritative.
+    if (!session || !profile || profile.id !== session.user.id || !status?.multiplayer.battles
+      || view !== 'adventure' || playing || battle || watching) { setOnlineResume(undefined); return; }
+    let current = true;
+    const refresh = async () => {
+      if (document.hidden) return;
+      const [battles, trades] = await Promise.allSettled([
+        api<{ battles: BattleView[] }>('/api/battles'),
+        api<{ trades: TradeView[] }>('/api/trades')
+      ]);
+      if (!current) return;
+      const activeBattles = battles.status === 'fulfilled'
+        ? battles.value.battles.filter(value => ['starting', 'active'].includes(value.status)).length : 0;
+      const activeTrades = trades.status === 'fulfilled'
+        ? trades.value.trades.filter(value => value.status === 'committing').length : 0;
+      setOnlineResume(activeBattles || activeTrades ? { battles: activeBattles, trades: activeTrades } : undefined);
+    };
+    void refresh();
+    const timer = setInterval(() => void refresh(), 15000);
+    return () => { current = false; clearInterval(timer); };
+  }, [session?.user.id, profile?.id, status?.multiplayer.battles, view, playing, battle, watching]);
 
   async function authenticate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setNotice('');
@@ -152,6 +178,10 @@ function App() {
         <Button variant="ghost" className="nav-item" aria-current={view === 'profile' ? 'page' : undefined} onClick={() => setView('profile')}><UserRound aria-hidden="true" />Trainer profile</Button>
       </nav><div className="sidebar-note"><span className="tiny-ball">●</span><h3>A familiar world.<br />A new connection.</h3><p>Your adventure, with a place to meet other trainers.</p></div><div className="service-status"><i className={status ? 'status-dot connected' : 'status-dot'} /><span>{status ? 'Service connected' : 'Service disconnected'}</span></div></aside>
       <main>
+        {onlineResume && view === 'adventure' && <StatusMessage className="notice">
+          <span>You have an online {onlineResume.battles && onlineResume.trades ? 'battle and trade' : onlineResume.battles ? 'battle' : 'trade'} in progress.</span>
+          <Button variant="link" size="sm" onClick={() => setView('lobby')}>Return to lobby</Button>
+        </StatusMessage>}
         {notice && !authView && !onboarding && <StatusMessage className="notice"><span>{notice}</span><Button variant="ghost" size="icon-sm" onClick={() => setNotice('')} aria-label="Dismiss message"><X aria-hidden="true" /></Button></StatusMessage>}
         {view === 'adventure' && <>
           <div className="section-kicker"><span>PALLET TOWN → EVERYWHERE</span><span>YOUR ADVENTURE AWAITS</span></div>

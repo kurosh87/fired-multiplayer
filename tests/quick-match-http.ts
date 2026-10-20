@@ -52,6 +52,13 @@ export async function checkQuickMatchHttp(database:Database,app:FastifyInstance,
     const waiting=await app.inject({method:'POST',url:'/api/battles/quick',headers:alice,payload:{}});
     assert.equal(waiting.statusCode,200,waiting.body);
     assert.deepEqual(waiting.json(),{status:'waiting',maxLevel:5});
+    // A reload can restore the searching state without enqueueing twice.
+    assert.equal((await app.inject({method:'GET',url:'/api/battles/quick'})).statusCode,401);
+    const waitingStatus=await app.inject({method:'GET',url:'/api/battles/quick',headers:alice});
+    assert.equal(waitingStatus.statusCode,200,waitingStatus.body);
+    assert.equal(waitingStatus.json().status,'waiting');
+    assert.equal(waitingStatus.json().maxLevel,5);
+    assert(Number.isFinite(waitingStatus.json().enqueuedAt));
     const paired=await app.inject({method:'POST',url:'/api/battles/quick',headers:bob,payload:{}});
     assert.equal(paired.statusCode,200,paired.body);
     const outcome=paired.json();
@@ -83,6 +90,7 @@ export async function checkQuickMatchHttp(database:Database,app:FastifyInstance,
     // Cancel stays idempotent over HTTP and clears every waiting entry.
     assert.deepEqual((await app.inject({method:'POST',url:'/api/battles/quick/cancel',headers:alice,payload:{}})).json(),{status:'idle'});
     assert.deepEqual((await app.inject({method:'POST',url:'/api/battles/quick/cancel',headers:bob,payload:{}})).json(),{status:'idle'});
+    assert.deepEqual((await app.inject({method:'GET',url:'/api/battles/quick',headers:alice})).json(),{status:'idle'});
     assert.equal((await database.pool.query('select count(*)::int as n from private.quick_match_queue')).rows[0].n,0,'Cancel must clear every waiting entry.');
     // A queued trainer who leaves the lobby takes their entry and presence
     // snapshot with them, and cannot queue from outside the lobby again.
@@ -90,6 +98,8 @@ export async function checkQuickMatchHttp(database:Database,app:FastifyInstance,
     assert.equal((await app.inject({method:'POST',url:'/api/lobby/leave',headers:bob,payload:{}})).statusCode,200);
     assert.equal((await database.pool.query('select count(*)::int as n from private.quick_match_queue where owner_id=$1',[b])).rows[0].n,0,
       'Leaving the lobby left a quick-match entry behind.');
+    assert.deepEqual((await app.inject({method:'GET',url:'/api/battles/quick',headers:bob})).json(),{status:'idle'},
+      'A stale queue row restored the searching state outside the lobby.');
     assert.equal((await database.pool.query('select count(*)::int as n from private.lobby_presence where session_id=$1',[boot.id])).rows[0].n,0,
       'Leaving the lobby left its presence snapshot behind.');
     const refused=await app.inject({method:'POST',url:'/api/battles/quick',headers:bob,payload:{}});

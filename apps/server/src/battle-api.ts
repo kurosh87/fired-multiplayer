@@ -53,6 +53,7 @@ export function registerBattleApi(app:FastifyInstance,service:BattleSessions|und
     if(Object.keys(request.body).length)throw new DomainError('INVALID_BATTLE','This action takes no game state.');
     return requireQuick().cancel(id);
   });
+  app.get('/api/battles/quick',async request=>requireQuick().status(await owner(request.headers.authorization)));
   const screen=(event:BattleScreenEvent)=>{
     const connection=connections.get(event.ownerId);
     if(connection?.id===event.id&&connection.socket.readyState===1){

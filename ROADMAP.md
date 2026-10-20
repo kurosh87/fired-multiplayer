@@ -13,16 +13,19 @@ The opt-in spectator and lobby live-list slice is implemented locally:
 - `WATCH_DISABLED` for a private battle;
 - `/api/battles/live` requires a live, unsuspended lobby session and only lists
   active opted-in battles;
-- schema, Supabase migration, Netlify migration, UI toggle and tests.
+- schema, Supabase migration, Netlify migration, UI toggle and tests;
+- reload continuity: quick-match state is restored from the server, and an
+  active battle or committing trade is surfaced on the adventure screen with a
+  one-click return to the lobby.
 
 Local verification is complete: `npm run typecheck`; the unit suite
 (132 tests, 131 passing, one skip); the database contract lane; the full
 migration chain with schema parity (`build/database-migrations-v4-watchable`);
 the original-C engine lane (`build/battle-service-report.json`, with
 `spectatorOptInEnforced`, `liveListRequiresLobby` and `liveListWatchableOnly`
-all true); and the browser lane (`build/web-watchable`, 12/12 desktop and
-mobile plus the production compile). The working tree remains intentionally
-uncommitted until review.
+all true); and the browser lanes (`build/web-watchable`, 12/12, and
+`build/web-quick-resume-v2`, 14/14, on desktop and mobile plus the production
+compile).
 
 After local verification, the next gate is
 [#1 Hosted staging qualification](https://github.com/kurosh87/fired-multiplayer/issues/1).

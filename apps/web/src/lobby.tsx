@@ -16,7 +16,13 @@ import type { LobbyTrainerPage } from '../../../packages/protocol/index.ts';
 import type { TradeView, PublicTradeOffer } from '../../../packages/trading/offers.ts';
 import type { TradeSceneBootstrap } from '../../server/src/trade-scenes.ts';
 import type {BattleView, LiveBattle, WatchSide} from '../../../packages/battles/protocol.ts';
+import type {QuickMatchStatus} from '../../server/src/quick-match.ts';
 import {TrainerDirectory} from './trainer-directory.tsx';
+
+function elapsed(since:number,now:number){
+  const total=Math.max(0,Math.floor((now-since)/1000));
+  return `${Math.floor(total/60)}:${String(total%60).padStart(2,'0')}`;
+}
 
 export function Lobby({ authenticated, available, trading=false, battles=false, onBattle, onWatch, onAdventures, onResume }: { authenticated: boolean; available: boolean; trading?: boolean; battles?:boolean; onBattle?(battle:BattleView):void;
   onWatch?(battle:LiveBattle,side:WatchSide):void;
@@ -32,6 +38,8 @@ export function Lobby({ authenticated, available, trading=false, battles=false, 
   const [busy,setBusy] = useState(false);
   const [notice,setNotice] = useState('');
   const [quick,setQuick]=useState<'idle'|'searching'>('idle');
+  const [quickSince,setQuickSince]=useState<number|undefined>(undefined);
+  const [clock,setClock]=useState(Date.now());
   const [watchable,setWatchable]=useState(false);
   const requestEpoch=useRef(0);
   const interaction=trades.some(trade=>trade.status==='committing')||challenges.some(battle=>['starting','active'].includes(battle.status));
@@ -83,6 +91,26 @@ export function Lobby({ authenticated, available, trading=false, battles=false, 
     };
     refresh();const timer=setInterval(refresh,5000);return()=>{current=false;clearInterval(timer);};
   },[available,authenticated,battles,busy,leaving]);
+  useEffect(()=>{
+    if(!available||!authenticated||!battles||httpBattles)return;
+    let current=true;
+    const refresh=()=>{
+      if(document.hidden||busy||leaving)return;
+      const epoch=requestEpoch.current;
+      void battleApi<QuickMatchStatus>('/quick').then(value=>{
+        if(!current||epoch!==requestEpoch.current)return;
+        if(value.status==='waiting'){setQuick('searching');setQuickSince(value.enqueuedAt);}
+        else {setQuick('idle');setQuickSince(undefined);}
+      }).catch(()=>{/* The next poll retries; the queue row is unchanged. */});
+    };
+    refresh();const timer=setInterval(refresh,5000);return()=>{current=false;clearInterval(timer);};
+  },[available,authenticated,battles,busy,leaving]);
+  useEffect(()=>{
+    if(quick!=='searching')return;
+    setClock(Date.now());
+    const timer=setInterval(()=>setClock(Date.now()),1000);
+    return()=>clearInterval(timer);
+  },[quick]);
   async function action(body:()=>Promise<void>) {
     if(busy)return;requestEpoch.current++;setBusy(true);setError('');setNotice('');
     try {await body();}catch(failure){setError(failure instanceof Error?failure.message:'The invitation could not be updated.');}
@@ -163,12 +191,13 @@ export function Lobby({ authenticated, available, trading=false, battles=false, 
         status={<Badge variant="secondary">{quickBattle?'Match ready':quick==='searching'?'Searching':'Ready'}</Badge>}
         footer={<div className="lobby-toolbar">
           {quickBattle?<Button size="sm" disabled={busy} onClick={()=>void action(async()=>{
-            const result=await battleApi<{battle:BattleView}>(`/${quickBattle.id}${httpBattles?'':'/open'}`,httpBattles?undefined:{});onBattle?.(result.battle);
+            const result=await battleApi<{battle:BattleView}>(`/${quickBattle.id}${httpBattles?'':'/open'}`,httpBattles?undefined:{});setQuick('idle');setQuickSince(undefined);onBattle?.(result.battle);
           })}>Open match</Button>
-          :quick==='searching'?<><p role="status">{myLevel>0?`Looking for a trainer near Lv. ${myLevel}…`:'Looking for a trainer…'}</p><Button variant="ghost" size="sm" disabled={busy} onClick={()=>void action(async()=>{await battleApi('/quick/cancel',{});setQuick('idle');})}>Stop searching</Button></>
+          :quick==='searching'?<><p role="status">{myLevel>0?`Looking for a trainer near Lv. ${myLevel}…`:'Looking for a trainer…'}</p>{quickSince!==undefined&&<p className="lobby-note">Waiting {elapsed(quickSince,clock)}</p>}<Button variant="ghost" size="sm" disabled={busy} onClick={()=>void action(async()=>{await battleApi('/quick/cancel',{});setQuick('idle');setQuickSince(undefined);})}>Stop searching</Button></>
           :<Button size="sm" disabled={busy||interaction} onClick={()=>void action(async()=>{
             const result=await battleApi<{status:string;bootstrap?:{battle:BattleView}}>('/quick',{});
-            if(result.status==='paired'&&result.bootstrap)onBattle?.(result.bootstrap.battle);else setQuick('searching');
+            if(result.status==='paired'&&result.bootstrap){setQuick('idle');setQuickSince(undefined);onBattle?.(result.bootstrap.battle);}
+            else {setQuick('searching');setQuickSince(Date.now());}
           })}><Swords aria-hidden="true" />Find a battle</Button>}
         </div>}>
         <p>Both trainers queue up and the server pairs the closest waiting party. You fight with your saved team at the levels you earned.</p>

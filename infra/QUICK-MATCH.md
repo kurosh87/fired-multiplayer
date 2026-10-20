@@ -40,6 +40,10 @@ leave the server: presence is species names, levels and a maximum level only.
   `{status:'paired',bootstrap}` — the paired side receives the full battle
   bootstrap, exactly like `accept`.
 - `POST /api/battles/quick/cancel` is idempotent and returns `{status:'idle'}`.
+- `GET /api/battles/quick` restores the caller's persisted queue state without
+  enqueueing again: `{status:'idle'}` or
+  `{status:'waiting',enqueuedAt,maxLevel}`. A stale row whose lobby session,
+  lease or account no longer qualifies reads idle.
 - Candidate selection prefers a live entry whose snapshot level is within ±15
   of the caller; once either entry is older than a minute the band relaxes and
   any live waiting trainer is eligible, in queue order.
@@ -59,7 +63,11 @@ leave the server: presence is species names, levels and a maximum level only.
 
 The lobby client shows a Quick Match card (find, searching with a stop control,
 or continue a ready match) and hands a paired result straight to the battle
-view. The card is scoped to the original API transport; the hosted
+view. A five-second status poll restores the searching state after a reload or
+reconnect, including the original queue time; it never creates a second entry.
+An active battle or committing trade is also surfaced on the adventure screen
+with a one-click return to the lobby, so a reload does not bury the resume path.
+The card is scoped to the original API transport; the hosted
 request-driven battle viewer has no queue endpoints, and the card is hidden
 there. The trainer directory renders the party chips, an edition filter and a
 "Near my level" toggle (±10 levels around the caller's own party maximum).

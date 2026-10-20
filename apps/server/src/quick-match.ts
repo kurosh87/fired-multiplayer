@@ -13,6 +13,7 @@ const SWEEP_MIN_AGE_MS=5_000;
 const SWEEP_BATCH=8;
 
 export type QuickMatchResult={status:'waiting';maxLevel:number|null}|{status:'paired';bootstrap:BattleBootstrap};
+export type QuickMatchStatus={status:'idle'}|{status:'waiting';enqueuedAt:number;maxLevel:number|null};
 export type QuickMatchStarter=(challenger:string,challenged:string)=>Promise<BattleBootstrap>;
 
 type QueueRow={owner_id:string;session_id:string;version:string;ruleset:string;max_party_level:number|null;enqueued_at:Date};
@@ -76,6 +77,19 @@ export class QuickMatch{
       await this.database.pool.query('delete from private.quick_match_queue where owner_id=$1',[owner]);
       return {status:'idle' as const};
     });
+  }
+
+  /** Restores the searching state after a reload or reconnect without creating
+   * a second entry. A stale queue row whose lobby session expired reads idle. */
+  async status(owner:string):Promise<QuickMatchStatus>{
+    const result=await this.database.pool.query<{enqueued_at:Date;max_party_level:number|null}>(
+      `select q.enqueued_at,q.max_party_level from private.quick_match_queue q
+        join private.game_sessions s on s.id=q.session_id and s.status='lobby' and s.lease_expires_at>clock_timestamp()
+        join public.profiles p on p.id=q.owner_id and p.suspended_at is null
+        where q.owner_id=$1`,[owner]);
+    const row=result.rows[0];
+    return row?{status:'waiting',enqueuedAt:new Date(row.enqueued_at).getTime(),
+      maxLevel:row.max_party_level==null?null:Number(row.max_party_level)}:{status:'idle'};
   }
 
   /** Opportunistic sweeper: expires TTL rows and re-attempts pairing for

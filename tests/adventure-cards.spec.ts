@@ -93,3 +93,19 @@ test('adventure cards ignore a previous account response after switching trainer
   await expect(page.getByText('Bob', { exact: true })).toHaveCount(0);
   await expect(page.getByText('Cloud save', { exact: true })).toHaveCount(0);
 });
+
+test('an active battle is surfaced from the adventure view after a reload', async ({ page }) => {
+  await page.route('**/__cards/**', async route => {
+    const path = new URL(route.request().url()).pathname;
+    await route.fulfill({ json: path.endsWith('/api/status') ? {
+      engines: ['firered', 'leafgreen'].map(version => ({ version, available: true })),
+      multiplayer: { lobby: true, battles: true, trading: true }
+    } : path.endsWith('/api/profile') ? { profile: { id: 'alice', handle: 'Alice' } }
+      : path.endsWith('/api/adventures') ? { adventures: [] }
+      : path.endsWith('/api/battles') ? { battles: [{ id: '00000000-0000-4000-8000-000000009999', status: 'active' }] }
+      : path.endsWith('/api/trades') ? { trades: [] } : {} });
+  });
+  await page.goto('/');
+  await expect(page.getByText('You have an online battle in progress.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Return to lobby' })).toBeVisible();
+});

@@ -55,6 +55,7 @@ test('adventure selection, account forms and navigation work before game integra
 
 test('lobby search, pages and trainer actions work beyond the first 100 names',async({page},info)=>{
   const errors:string[]=[],actions:{kind:string;trainerId:string;watchable?:boolean}[]=[],offeredTrades:unknown[]=[],offeredBattles:unknown[]=[],quickActions:string[]=[];
+  let quickWaiting=false,quickStatusReads=0;
   page.on('pageerror',error=>errors.push(error.message));
   const trainers:LobbyTrainer[]=Array.from({length:150},(_,index)=>({
     id:`00000000-0000-4000-8000-${String(index+1000).padStart(12,'0')}`,
@@ -87,8 +88,9 @@ test('lobby search, pages and trainer actions work beyond the first 100 names',a
     else if(path==='/api/trades'&&request.method()==='GET')response={trades:offeredTrades};
     else if(path==='/api/battles'&&request.method()==='GET')response={battles:offeredBattles};
     else if(path==='/api/battles/live'&&request.method()==='GET')response={battles:liveBattles};
-    else if(path==='/api/battles/quick'&&request.method()==='POST'){quickActions.push('queue');response={status:'waiting',maxLevel:0};}
-    else if(path==='/api/battles/quick/cancel'&&request.method()==='POST'){quickActions.push('cancel');response={status:'idle'};}
+    else if(path==='/api/battles/quick'&&request.method()==='GET'){quickStatusReads++;response=quickWaiting?{status:'waiting',enqueuedAt:Date.now()-1500,maxLevel:0}:{status:'idle'};}
+    else if(path==='/api/battles/quick'&&request.method()==='POST'){quickActions.push('queue');quickWaiting=true;response={status:'waiting',maxLevel:0};}
+    else if(path==='/api/battles/quick/cancel'&&request.method()==='POST'){quickActions.push('cancel');quickWaiting=false;response={status:'idle'};}
     else if(request.method()==='POST'&&(path==='/api/trades'||path==='/api/battles/challenge')){
       const {trainerId,watchable}=request.postDataJSON(),target=trainers.find(trainer=>trainer.id===trainerId)!;
       actions.push(watchable===undefined?{kind:path,trainerId}:{kind:path,trainerId,watchable});expect(target).toBeTruthy();
@@ -117,6 +119,12 @@ test('lobby search, pages and trainer actions work beyond the first 100 names',a
   await quickPanel.getByRole('button',{name:'Find a battle'}).click();
   await expect(quickPanel.getByText('Searching',{exact:true})).toBeVisible();
   await expect(quickPanel.getByRole('status')).toHaveText('Looking for a trainer…');
+  // A status poll must confirm the persisted queue row, not reset the UI.
+  const readsBefore=quickStatusReads;
+  await expect.poll(()=>quickStatusReads,{timeout:8000}).toBeGreaterThan(readsBefore);
+  await expect(quickPanel.getByText('Searching',{exact:true})).toBeVisible();
+  await expect(quickPanel.getByRole('status')).toHaveText('Looking for a trainer…');
+  await expect(quickPanel.getByText(/^Waiting \d+:\d{2}$/)).toBeVisible();
   await quickPanel.getByRole('button',{name:'Stop searching'}).click();
   await expect(quickPanel.getByText('Ready',{exact:true})).toBeVisible();
   // The live list is the server's public projection and hands off to watch mode.
