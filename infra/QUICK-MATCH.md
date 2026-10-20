@@ -245,14 +245,18 @@ owner routing for `/api/battles/live`, `quick` and `quick/cancel`; and
 a real encoded keyframe/delta onto the canvas (12/12 desktop and mobile).
 `tests/original-battle-sessions.ts` also asserts that a spectator's pixels are
 byte-identical to the owner's own side and that suspension and non-lobby
-admission fail against the real original-C battle. That engine-gated leg
-(`KANTO_CHECK_ORIGINAL_BATTLES=1`) remains an open qualification item: two
-attempts ended with the test runner reporting only `test failed` and no
-assertion (before the original-battle report was written), and one attempt was
-stopped by the shared guard at critical kernel memory pressure
-(`memory_pressure=4`, `resource_stopped`). A normal-pressure retry on October 19
-UTC after the CI fixes reproduced the silent engine-leg failure (55 s, no
-assertion), so it is not treated as a passed check.
+admission fail against the real original-C battle. The engine-gated leg
+(`KANTO_CHECK_ORIGINAL_BATTLES=1`) now passes. The earlier silent `test failed`
+was a memory kill, not an engine assertion: the before/after
+`select id,revision,flash from private.adventures` read every adventure in the
+fixture, including large saves from earlier checks, and the post-battle result
+grew the client process until it was killed without running JavaScript exit
+handlers. The query also included the spectator adventure inserted after the
+before snapshot. Scoping both snapshots to the two owners removes the unrelated
+saves and the false mismatch. The passing run on October 19 UTC (local, under
+the task-local disk reserve) rewrote `build/battle-service-report.json` with
+`originalC:true`, frame-2000 checkpoint/journal recovery, 1,421 rendered screens
+per side, the spectator pixel/admission checks and `result: finished`.
 
 Slice 2 milestone 3 (live-list push over the presence socket) additionally
 covers: `tests/lobby-presence.test.ts` (baseline read, start and finish
@@ -272,7 +276,9 @@ runs in its own lane); the disposable database contract
 (`python3 -B scripts/check-database.py`, real Postgres 17); and the browser lane
 (`node --experimental-strip-types scripts/check-web-local.ts
 build/web-live-push`, 12/12 on desktop and mobile plus the production compile)
-all pass. No production migration, capability flag or public admission changed.
+all pass. The engine-gated original-battle leg also passes on the same setup
+after the scoped-save fix above. No production migration, capability flag or
+public admission changed.
 
 A successful pair through HTTP against the original battle core still needs a
 battle-capable application registry; the fixture application deliberately

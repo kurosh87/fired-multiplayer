@@ -46,7 +46,7 @@ export async function checkOriginalBattleSessions(database:Database,owners:[stri
         select gen_random_uuid(),owner_id,id,'qualification-lobby',0,revision,'lobby',clock_timestamp()+interval '60 seconds'
         from private.adventures where id=$1`,[saves[side]]);
     }
-    const before=(await database.pool.query('select id,revision,flash from private.adventures order by id')).rows;
+    const before=(await database.pool.query('select id,revision,flash from private.adventures where owner_id=any($1::uuid[]) order by id',[owners])).rows;
     const challenge=await service.challenge(owners[0],owners[1]);
     const bootstrap=await service.accept(owners[1],challenge.id);assert.equal(bootstrap.battle.status,'active');
     assert(!('checkpoint' in bootstrap)&&!('manifest' in bootstrap)&&!('seed' in bootstrap));
@@ -102,7 +102,7 @@ export async function checkOriginalBattleSessions(database:Database,owners:[stri
     assert(finished,'The durable original-C battle did not finish.');assert(recovered);assert(screens.every(count=>count>100));
     const final=await service.get(owners[0],challenge.id);
     assert.deepEqual(await service.forfeit(owners[0],challenge.id),final.result,'A retry changed the original result.');
-    assert.deepEqual((await database.pool.query('select id,revision,flash from private.adventures order by id')).rows,before);
+    assert.deepEqual((await database.pool.query('select id,revision,flash from private.adventures where owner_id=any($1::uuid[]) order by id',[owners])).rows,before);
     assert.equal((await database.pool.query("select count(*)::int as n from private.game_sessions where owner_id=any($1::uuid[]) and status='lobby'",[owners])).rows[0].n,2);
     await mkdir('build',{recursive:true});
     await writeFile('build/battle-service-report.json',JSON.stringify({artifacts:[registry.manifest('firered').id,registry.manifest('leafgreen').id],
